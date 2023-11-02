@@ -1,4 +1,5 @@
 ---
+author: Leo Aarnio
 title: "IODS course project"
 output:
   html_document:

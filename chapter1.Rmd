@@ -1,7 +1,13 @@
 
 # About the project
 
-*Write a short description about the course and add a link to your GitHub repository here. This is an R Markdown (.Rmd) file so you should use R Markdown syntax.*
+*This course is a practical introduction to open data science directed to the
+PhD student. Having completed the course, the student is to be equipped with the understanding, tools and methods to employ the principles of open science in his 
+daily work.*
+
+Here is a link to my github repository:
+
+https://github.com/ltjaarni/IODS-project
 
 ```{r}
 # This is a so-called "R chunk" where you can write R code.
@@ -9,5 +15,39 @@
 date()
 
 ```
-The text continues here.
+I am excited to learn more R Markdown and the use of Git. I found the course by
+browsing through the course catalogue for the general studies -module for PhD
+students and found this course to be among the most relevant and interesting. 
 
+I find the approach of the course to be very topical and am looking forward to
+learning more about the principles and practices of open data and open science.
+This is the direction I believe science to be heading towards: sharing openly
+all that can be safely shared with regards the epistemically important steps in
+reaching the inferences one draws in any published study. In general, this can
+be understood as a way to boost the self-correcting mechanism of science, for
+instance through its reproducibility, an issue I believe to be of utmost interest
+specifically now that the many challenges that have been recently revealed
+regarding how dubiously these processes currently operate. 
+
+Handling  uncertainty by appropriate statistical methods is only the tip of the 
+iceberg here. _There are plenty epistemically important steps taken that tend to 
+remain hidden and that cannot be accounted for within-model alone_: the entire 
+process from experimental design to conclusions involve decisions the logic of which
+it is important to ground in any scientific report, and this implies having to be 
+explicit about such choices in a way that they, too, are made open to the public 
+scrutiny of scientific peers.
+
+On an even more general note, I believe the entire philosophy on the conduct of 
+science to be in need of drastic rethinking. This means, first and foremost, taking
+scientific agenthood seriously so that the scientist takes direct accountability
+for all the epistemically important choices he makes in the process of inference.
+I believe we have a history of more than a century of a misguided ideal to shake
+here, where many of the choices clearly dependent on one's judgement are masked as 
+non-choices, as if they were objective and uncontested: came upon the scientist 
+considered a passive observer of reality in and of itself. One manifestation of 
+this is the downright fallacious mode of writing scientific text in a passive tone,
+as if inescapable things merely happened to the scientist as if he was not the one
+actually conducting them. This entire outlook should be turned on its head: science
+is not about mirroring reality, but about building a case constrained by it. Science 
+ought comprise of making a convincing argument to an overt objective of inference 
+backed up by plausible reasoning the scientist himself is accountable for seriously grounding.
