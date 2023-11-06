@@ -17,7 +17,8 @@ date()
 ```
 I am excited to learn more R Markdown and the use of Git. I found the course by
 browsing through the course catalogue for the general studies -module for PhD
-students and found this course to be among the most relevant and interesting. 
+students and found this course to be among the most relevant and interesting on
+offer. 
 
 I find the approach of the course to be very topical and am looking forward to
 learning more about the principles and practices of open data and open science.
@@ -26,7 +27,7 @@ all that can be safely shared with regards the epistemically important steps in
 reaching the inferences one draws in any published study. In general, this can
 be understood as a way to boost the self-correcting mechanism of science, for
 instance through its reproducibility, an issue I believe to be of utmost interest
-specifically now that the many challenges that have been recently revealed
+specifically now with the many challenges that have been recently revealed
 regarding how dubiously these processes currently operate. 
 
 Handling  uncertainty by appropriate statistical methods is only the tip of the 
@@ -44,9 +45,9 @@ for all the epistemically important choices he makes in the process of inference
 I believe we have a history of more than a century of a misguided ideal to shake
 here, where many of the choices clearly dependent on one's judgement are masked as 
 non-choices, as if they were objective and uncontested: came upon the scientist 
-considered a passive observer of reality in and of itself. One manifestation of 
-this is the downright fallacious mode of writing scientific text in a passive tone,
-as if inescapable things merely happened to the scientist as if he was not the one
+conceived of as a passive observer of reality in and of itself. One manifestation of 
+this is the downright fallacious mode of writing scientific text in a passive tone:
+inescapable states of affairs being forced upon the scientist as if he was not the one
 actually conducting them. This entire outlook should be turned on its head: science
 is not about mirroring reality, but about building a case constrained by it. Science 
 ought comprise of making a convincing argument to an overt objective of inference 
