@@ -1,13 +1,213 @@
-# Insert chapter 2 title here
+# A case study in linear regression
 
-*Describe the work you have done this week and summarize your learning.*
+_In the following, we will explore, with a rough explanatory and predictive model,_
+_the association that approaches and study skills to learning as well as attitudes towards_ _statistics has on exam performance in statistics._ 
 
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods.
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using.
+The explanatory variables concerning approaches to studying and study skills are based on a shortened version of a standardized measure called ASSIST (Approaches and Study Skills Inventory for Students) and the explanatory variables concerning attitudes towards statistics are based on SATS (Survey of Attitudes Toward Statistics). We construct composite measures on the attitude, a deep approach to learning, a surface approach to learning and a strategic approach to learning that are based on the mean of original questionnaire items on each of these dimensions. We will treat our integer valued target variable as if it were a continuous, real-values variable, and use a linear regression model to explain and predict the score with these composite dimensions as explanatory variables.
 
-```{r}
+```{r, echo=FALSE}
 date()
 ```
 
-Here we go again...
+We first read in an analysis dataset we have already preprocessed. 
+
+```{r, warning=FALSE}
+
+# We require the library readr
+
+library(readr)
+
+# Read the file into the workspace
+learning2014<-read_csv("~/Intro_to_ODS/IODS/data/learning2014.csv")
+
+# Check the head and structure of the data
+str(learning2014)
+head(learning2014)
+
+```
+
+The data has 166 observations on 7 variables: "gender", "age", "attitude", "deep", "stra",
+"surf" and "points". Gender is a character vector that is a categorical variable and the others are numeric, with age and points integer-valued (absolute scale) and the rest interval-scaled (the interpretation being that there is no natural 0 for attitude nor the approaches to learning). "Attitude", "deep", "stra" and "surf" are composite measures on
+attitudes towards statistics, deep, strategic and surface approach to learning,
+respectively. "Points" is our primary outcome variable of interest that measures the
+score on a statistics exam.
+
+Let us take a brief look at the data with a quick visual. We use gender as a
+partitioning variable for displaying the one-against-one associations (scatter plots and correlation coefficients) and the kernels of all the other variables in our analysis dataset.
+
+```{r, warning=FALSE}
+# We require GGally and ggplot2 libraries for our visuals
+library(GGally)
+library(ggplot2)
+
+# Create a plot matrix with ggpairs()
+p <- ggpairs(learning2014[-1], mapping = aes(col=learning2014$gender, alpha=0.3), lower = list(combo = wrap("facethist", bins = 20)))
+
+# draw the plot
+p
+
+```
+
+We see from the scatter plots and the Pearson correlation coefficients that the strongest
+association -- when looking at each variable of our dataset against another -- seems to be between attitude and points. Moreveor, none of the other of our candidates for serving as explanatory or predictive of exam performance have any notable correlation with our outcome variable of interest. With regard to these, the data is compatible with the null of nil correlation, whereas in terms of the association between attitude and points, the data is strongly suggestive of rejecting the null. More importantly, the point estimate for the correlation coefficient suggests a very strong association of substantive interest.
+
+Also of interest is the fact that the surface approach to learning is correlated with
+attitude, deep approach and strategic approach to learning (it seems intuitive from
+the name that it ought indeed be negatively correlated with the deep approach). This
+means that if we decided to include the surface approach as an explanatory variable
+in our regression model, we should be on the look out for multicollinearity.
+
+Some other descriptive observations of interest from our plot are that men seem to score better on attitude, whereas women have a higher score on the surface approach to learning.
+Also, it is of interest that there seems to be no difference between the genders in terms
+of exam performance. In terms of demographics, we may note that most students are young and
+roughly in their twenties.
+
+Since the association between attitude and points is the one clearly popping out, let us
+look at a larger visual of the scatter plot with a fitted regression line.
+
+```{r, warning=FALSE}
+
+# We require ggplot for our visual
+library(ggplot2)
+
+# iOnitialize plot with data and aesthetic mapping
+p1 <- ggplot(learning2014, aes(x = attitude, y = points))
+
+# Define the visualization type (points)
+p2 <- p1 + geom_point()
+
+# Add a regression line
+p3 <- p2 + geom_smooth(method = "lm")
+
+# Add a main title
+p4 <- p3 + ggtitle("Exam performance as a function of students' attitudes") + theme(plot.title = element_text(hjust = 0.5))
+
+# Draw the plot
+p4
+
+
+```
+
+
+The fitted regession line and its 95% confidence band confirm what is already visible from the scatter plot to the naked eye: there is a clear positive correlation between attitude
+and exam performance. When looking at the singular questionnaire items that we have utilized in deriving the composite attitude measure, this association makes perfect sense.
+
+The confidence band widens when moving towards both ends of the composite attitude measure, since we have less observations with very high and very low overall score.
+
+Let us also look at some basic summary statistics of each variable of interest before moving forward.
+
+```{r, warning=FALSE}
+summary(learning2014,digits=3)
+
+```
+
+If we were interested in predictive performance -- as opposed to constructing some
+theory-laden model and interpreting it against this theoretical background -- we might be
+inclined to choose, as an initial model, one that included those predictor variables with
+the highest absolute values of their correlation coefficient point estimates with our outcome variable of interest. So let us start there and compile a regression model with
+(an intercept term and) the predictor variables "attitude", "stra" and "surf" (ordered here in a decreasing order of the absolute value of the point estimates for their correlation coefficients).
+
+```{r, warning=FALSE}
+
+# Fit regression model with three variables as predictors
+my_model3 <- lm(points ~ attitude + stra + surf, data = learning2014)
+
+# print out a summary of the model
+summary(my_model3)
+
+```
+We have a linear regression model of the following form:
+
+$y_i=b_0 + b_1x_i + b_2x_i + b_3x_i + \epsilon_i$,
+
+where $i$ indexes the observations, and where we let the regression coefficients be numbered so that they denote, in an ascending order by their index, the intercept, attitude, stra and surf, respectively.
+
+We assume that the error terms $\epsilon$ are normally distributed with mean zero and have a constant variance across different values for the explanatory variables.
+
+We use ordinary least-squares to estimate our regression terms. We see that the point estimate for $b_1$, $\hat{b_1}$, is roughly 3.4, with a standard error of roughly 0.6. So a unit increase in attitude is associated with a roughly 2- to 5-fold increase in the expected score of the exam, with our best estimate a 3.4-fold increase. This is a substantial increase given that the score has a range from 7 to 33 and the attitude a range from 1.4 to 5. Based on the t-test, the data is incompatible with the null of "no effect" (a coefficient of zero), with a highly significant p-value of 0.00000002. We get the t-value by dividing the regression coefficient point estimate by its standard error, and then the p-value for the two-sided test from the t-distribution with 162 degrees of freedom. 
+
+Our other two regression coefficient point estimates suggest that both the strategic approach to learning and the surface approach to learning have a relatively small "effect" (or perhaps better, "association") on exam performance, when the other variables in the model are fixed. Given the relatively large sample size we have of 166 observations, it is no surprise that our data is compatible with the null of "no effect" for these variables.
+
+Given that the estimate for the regression coefficient of one of our explanatory variables is incompatible with the null of no effect, it is unsurprising that the omnibus test for the null that all coefficients are nil has a very small p-value based on the F-test. Our multiple R-squared is estimated at 0.21, which means that roughly 20% percent of the variation of the exam score can be explained by the explanatory variables. With but such a simple model, this is a decent, if still a relatively low value. The adjusted R-squared value, that penalizes a more complex model for its count of explanatory variables, suggests that a more parsimonious model would perhaps be commendable, as does the fact that two of our regression coefficients are not statistically significant. We are nonetheless somewhat tempted to let "stra" remain in the model, since its relatively high
+p-value does not necessarily imply it is entirely redundant (this depends on the overall
+model, and we have correlation between "stra" and "surf"), so we decide to explore what happens if we first drop only "surf" from the overall model.
+
+```{r, warning=FALSE}
+
+# create a regression model with multiple explanatory variables
+my_model2 <- lm(points ~ attitude + stra, data = learning2014)
+
+# print out a summary of the model
+summary(my_model2)
+
+```
+
+We observe that there are no considerable differences to the above in terms of our explanatory variable "attitude", and relatively minor changes to that of "stra", although
+its t-value increases by a small margin. Our multiple R-squared decreases by a very small amount, and our adjusted R-squared increases by a very small amount. We decide to further drop "stra", which remains statistically non-significant in our reduced model.
+
+```{r, warning=FALSE}
+
+# create a regression model with multiple explanatory variables
+my_model3 <- lm(points ~ attitude, data = learning2014)
+
+# print out a summary of the model
+summary(my_model3)
+
+```
+
+The interpretation of the association of "attitude" with that of the exam score remains as before, since there are no notable changes in our estimates concerning the explanatory variable in question.
+
+However, our overall model performance has faced a minor decrease, with a very small decrease in both the multiple R-squared and the adjusted R-squared, so, depending on the use to which we would like to put our model, we might lean towards the more expansive model with two instead the single explanatory variable (especially if we wanted to maximize predictive performance). With our simple linear regression model, our multiple R-squared is the square of the correlation coefficient we observed in our matrix plot earlier.
+
+Following instructions to drop all explanatory variables with a non-significant regression coefficient estimate, we settle for the simple linear regression model of the form:
+
+$y_i=b_0 + b_1x_i + \epsilon_i$,
+
+with the notation as provided earlier.
+
+We produce diagnostic plots in line with this model to see whether those assumptions we our told to focus on related with our regression model hold.
+
+```{r, warning=FALSE}
+
+# Create our final simple regression model
+my_model2 <- lm(points ~ attitude, data = learning2014)
+
+# draw diagnostic plots using the plot() function. Choose the plots 1, 2 and 5
+plot(my_model2, which=c(1,2,5))
+
+```
+
+We can use the first of our plots to assess whether the homoskedasticity assumption of our model holds. In other words, whether we have constant variance of the error terms across different values for our explanatory variable (notice that we have an x-axis based on our fitted values, but these are merely functions of the constant intercept term and the explanatory variable values). We may observe that our assumption of constant variance holds rather well: there might be some signs of reduced variance for fitted values above 26, but this is a minor discrepancy from the assumption that concerns but roughly ten observations. We seem to have some outliers in observations 145, 56 and 35. Apparently these students did considerably less well than one would have expected given their relatively positive attitude towards statistics. Perhaps they did not put in the required work, after all. There are plenty of plausible reasons one can think of that might explain such outliers. We may also observe from the plot that the linearity assumption seems to hold well: there is no need to, for example, include a higher-order term in our regression model.
+
+From our second plot we may readily observe that the normality assumption of our error terms seems to also hold relatively well, with the minor exceptions being the aforementioned potential outliers as well as those with an observed exam performance even higher than what their attitude alone would have us predict (those with fitted values of 25 or more). For this phenomenon one can also cook up intuitive explanations: some always perform well, even if they were less into the subject than we might expect from their performance. 
+
+Although there really is no beating the visual ease of the comparison of the sample quantiles to a staight line drawn on the basis of the theoretical quantiles provided by the Q-Q -plot, let us see what an estimated density plot of the residuals would look like.
+
+```{r, warning=FALSE}
+
+# draw diagnostic plots using the plot() function. Choose the plots 1, 2 and 5
+plot(density(resid(my_model2)),main="Density plot of residuals")
+
+```
+
+Here we see that our kernel estimate provides a density that appears as normal as
+one ever tends to get with actual data. However, we do observe the impact of the outliers, as those observed values that are much lower than expected in terms of our model fit
+produce a left tail that is fatter than the normal distribution allows for.
+
+Our final plot allows us to analyze outliers and whether we have influential observations the removal of which would considerably change our regression coefficient estimates. I do not see Cook's distance drawn on the plot and suspect this is because there are no influential observations. The line depicting Cook's distance would thereby lie outside the region of our graph. Let us then visualize the Cook's distances on a separate plot.
+
+```{r, warning=FALSE}
+
+# draw diagnostic plots using the plot() function. Choose the plots 1, 2 and 5
+plot(my_model2,which=4)
+
+```
+
+Indeed, none of the observations have a Cook's distance anywhere near 1, so there is
+no need to be concerned about influential observations with unduly strong effects on our
+regression estimates.
+
+We conclude that our model provides an adequate fit to the data and none of the assumptions
+inherent in our simple linear regression model whose parameters are estimated on the basis of ordinary least squares are seriously violated.
+
+We conclude that attitude towards statistics seems to be an important predictor of exam performance and warrants a more detailed analysis in future quantitative research. Such analysis could, for instance, provide a better understanding of whether we could put these initial findings of ours to practical use in, for example, enhancing learning of statistics by improving the attitudes students have towards it. 

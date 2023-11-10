@@ -1,16 +1,17 @@
 
-# About the project
-
 *This course is a practical introduction to open data science directed to the
 PhD student. Having completed the course, the student is to be equipped with the understanding, tools and methods to employ the principles of open science in his 
 daily work.*
 
-Here is a link to my github repository:
+# About the project
+
+The project displayed in what follows concerns statistical analysis done with a plethora of techniques useful in gaining a quantitative understanding of the phenomena we are to probe into. We will go through linear and logistic regression, clustering and classification, dimensionality reduction and longitudinal analysis.
+
+Here is a link to my github repository that holds the contents of the analysis:
 
 https://github.com/ltjaarni/IODS-project
 
 ```{r}
-# This is a so-called "R chunk" where you can write R code.
 
 date()
 
