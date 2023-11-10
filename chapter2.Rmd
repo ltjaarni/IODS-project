@@ -1,7 +1,7 @@
 # A case study in linear regression
 
 _In the following, we will explore, with a rough explanatory and predictive model,_
-_the association that approaches and study skills to learning as well as attitudes towards_ _statistics has on exam performance in statistics._ 
+_the association that approaches and study skills to learning as well as attitudes towards_ _statistics have on exam performance in statistics._ 
 
 The explanatory variables concerning approaches to studying and study skills are based on a shortened version of a standardized measure called ASSIST (Approaches and Study Skills Inventory for Students) and the explanatory variables concerning attitudes towards statistics are based on SATS (Survey of Attitudes Toward Statistics). We construct composite measures on the attitude, a deep approach to learning, a surface approach to learning and a strategic approach to learning that are based on the mean of original questionnaire items on each of these dimensions. We will treat our integer valued target variable as if it were a continuous, real-values variable, and use a linear regression model to explain and predict the score with these composite dimensions as explanatory variables.
 
