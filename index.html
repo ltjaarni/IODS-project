@@ -402,7 +402,7 @@ dimensionality reduction and longitudinal analysis.</p>
 analysis:</p>
 <p><a href="https://github.com/ltjaarni/IODS-project" class="uri">https://github.com/ltjaarni/IODS-project</a></p>
 <pre class="r"><code>date()</code></pre>
-<pre><code>## [1] &quot;Fri Nov 10 15:16:54 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Fri Nov 10 15:22:53 2023&quot;</code></pre>
 <p>I am excited to learn more R Markdown and the use of Git. I found the
 course by browsing through the course catalogue for the general studies
 -module for PhD students and found this course to be among the most
@@ -463,7 +463,7 @@ We will treat our integer valued target variable as if it were a
 continuous, real-valued variable, and use a linear regression model to
 explain and predict the score with these composite dimensions as
 explanatory variables.</p>
-<pre><code>## [1] &quot;Fri Nov 10 15:16:54 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Fri Nov 10 15:22:53 2023&quot;</code></pre>
 <p>We first read in an analysis dataset we have already
 preprocessed.</p>
 <pre class="r"><code># We require the library readr
@@ -516,11 +516,15 @@ str(learning2014)</code></pre>
 vector that is a categorical variable and the others are numeric, with
 age and points integer-valued (absolute scale) and the rest
 interval-scaled (the interpretation being that there is no natural 0 for
-attitude nor the approaches to learning). “Attitude”, “deep”, “stra” and
-“surf” are composite measures on attitudes towards statistics, deep,
-strategic and surface approach to learning, respectively. “Points” is
-our primary outcome variable of interest that measures the score on a
-statistics exam.</p>
+attitude nor the approaches to learning, and that since we have averaged
+the original items in deriving the composite measures, we have already
+treated these items as if they were at least interval-valued, even if
+measured on a Likert-scale more befitting, strictly speaking, of an
+ordinal interpretation). “Attitude”, “deep”, “stra” and “surf” are
+composite measures on attitudes towards statistics, deep, strategic and
+surface approach to learning, respectively. “Points” is our primary
+outcome variable of interest that measures the score on a statistics
+exam.</p>
 <p>Let us take a brief look at the data with a quick visual. We use
 gender as a partitioning variable for displaying the one-against-one
 associations (scatter plots and correlation coefficients) and the

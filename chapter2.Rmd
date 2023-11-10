@@ -27,10 +27,7 @@ head(learning2014)
 ```
 
 The data has 166 observations on 7 variables: "gender", "age", "attitude", "deep", "stra",
-"surf" and "points". Gender is a character vector that is a categorical variable and the others are numeric, with age and points integer-valued (absolute scale) and the rest interval-scaled (the interpretation being that there is no natural 0 for attitude nor the approaches to learning). "Attitude", "deep", "stra" and "surf" are composite measures on
-attitudes towards statistics, deep, strategic and surface approach to learning,
-respectively. "Points" is our primary outcome variable of interest that measures the
-score on a statistics exam.
+"surf" and "points". Gender is a character vector that is a categorical variable and the others are numeric, with age and points integer-valued (absolute scale) and the rest interval-scaled (the interpretation being that there is no natural 0 for attitude nor the approaches to learning, and that since we have averaged the original items in deriving the composite measures, we have already treated these items as if they were at least interval-valued, even if measured on a Likert-scale more befitting, strictly speaking, of an ordinal interpretation). "Attitude", "deep", "stra" and "surf" are composite measures on attitudes towards statistics, deep, strategic and surface approach to learning, respectively. "Points" is our primary outcome variable of interest that measures the score on a statistics exam.
 
 Let us take a brief look at the data with a quick visual. We use gender as a
 partitioning variable for displaying the one-against-one associations (scatter plots and correlation coefficients) and the kernels of all the other variables in our analysis dataset.
