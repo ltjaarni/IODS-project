@@ -402,7 +402,7 @@ dimensionality reduction and longitudinal analysis.</p>
 analysis:</p>
 <p><a href="https://github.com/ltjaarni/IODS-project" class="uri">https://github.com/ltjaarni/IODS-project</a></p>
 <pre class="r"><code>date()</code></pre>
-<pre><code>## [1] &quot;Mon Nov 13 09:45:30 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Mon Nov 13 10:30:48 2023&quot;</code></pre>
 <p>I am excited to learn more R Markdown and the use of Git. I found the
 course by browsing through the course catalogue for the general studies
 -module for PhD students and found this course to be among the most
@@ -463,7 +463,7 @@ We will treat our integer-valued target variable as if it were a
 continuous, real-valued variable, and use a linear regression model to
 explain and predict the score with these composite dimensions as
 explanatory variables.</p>
-<pre><code>## [1] &quot;Mon Nov 13 09:45:30 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Mon Nov 13 10:30:48 2023&quot;</code></pre>
 <p>We first read in an analysis dataset we have already
 preprocessed.</p>
 <pre class="r"><code># We require the library readr
@@ -564,9 +564,13 @@ multicollinearity.</p>
 <p>Some other descriptive observations of interest from our plot are
 that men seem to score better on attitude, whereas women have a higher
 score on the surface and the strategic approach to learning. Also, it is
-of interest that there seems to be no difference between the genders in
-terms of exam performance. In terms of demographics, we may note that
-most students are young and roughly in their twenties.</p>
+of interest that there seems to be very little difference between the
+genders in terms of exam performance – risking an overinterpretation
+made from but an estimated density plot, the bump in men’s performance
+in the right-tail of the points density might indicate they have a
+higher probability than women of scoring extremely well in the exam. In
+terms of demographics, we may note that most students are young and
+roughly in their twenties.</p>
 <p>Since the association between attitude and points is the one clearly
 popping out, let us look at a larger visual of the scatter plot with a
 fitted regression line.</p>

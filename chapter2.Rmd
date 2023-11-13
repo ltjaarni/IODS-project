@@ -54,7 +54,7 @@ the name that it ought indeed be negatively correlated with the deep approach). 
 means that if we decided to include the surface approach as an explanatory variable
 in our regression model, we should be on the lookout for multicollinearity.
 
-Some other descriptive observations of interest from our plot are that men seem to score better on attitude, whereas women have a higher score on the surface and the strategic approach to learning. Also, it is of interest that there seems to be no difference between the genders in terms of exam performance. In terms of demographics, we may note that most students are young and roughly in their twenties.
+Some other descriptive observations of interest from our plot are that men seem to score better on attitude, whereas women have a higher score on the surface and the strategic approach to learning. Also, it is of interest that there seems to be very little difference between the genders in terms of exam performance -- risking an overinterpretation made from but an estimated density plot, the bump in men's performance in the right-tail of the points density might indicate they have a higher probability than women of scoring extremely well in the exam. In terms of demographics, we may note that most students are young and roughly in their twenties.
 
 Since the association between attitude and points is the one clearly popping out, let us
 look at a larger visual of the scatter plot with a fitted regression line.
