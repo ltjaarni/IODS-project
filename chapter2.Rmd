@@ -3,7 +3,7 @@
 _In the following, we will explore, with a rough explanatory and predictive model,_
 _the association that approaches and study skills to learning as well as attitudes towards_ _statistics have on exam performance in statistics._ 
 
-The explanatory variables concerning approaches to studying and study skills are based on a shortened version of a standardized measure called ASSIST (Approaches and Study Skills Inventory for Students) and the explanatory variables concerning attitudes towards statistics are based on SATS (Survey of Attitudes Toward Statistics). We construct composite measures on the attitude, a deep approach to learning, a surface approach to learning and a strategic approach to learning that are based on the mean of original questionnaire items on each of these dimensions. We will treat our integer valued target variable as if it were a continuous, real-valued variable, and use a linear regression model to explain and predict the score with these composite dimensions as explanatory variables.
+The explanatory variables concerning approaches to studying and study skills are based on a shortened version of a standardized measure called ASSIST (Approaches and Study Skills Inventory for Students) and the explanatory variables concerning attitudes towards statistics are based on SATS (Survey of Attitudes Toward Statistics). We construct composite measures on the attitude, a deep approach to learning, a surface approach to learning and a strategic approach to learning that are based on the mean of original questionnaire items on each of these dimensions. We will treat our integer-valued target variable as if it were a continuous, real-valued variable, and use a linear regression model to explain and predict the score with these composite dimensions as explanatory variables.
 
 ```{r, echo=FALSE}
 date()
@@ -52,12 +52,9 @@ Also of interest is the fact that the surface approach to learning is correlated
 attitude, deep approach and strategic approach to learning (it seems intuitive from
 the name that it ought indeed be negatively correlated with the deep approach). This
 means that if we decided to include the surface approach as an explanatory variable
-in our regression model, we should be on the look out for multicollinearity.
+in our regression model, we should be on the lookout for multicollinearity.
 
-Some other descriptive observations of interest from our plot are that men seem to score better on attitude, whereas women have a higher score on the surface approach to learning.
-Also, it is of interest that there seems to be no difference between the genders in terms
-of exam performance. In terms of demographics, we may note that most students are young and
-roughly in their twenties.
+Some other descriptive observations of interest from our plot are that men seem to score better on attitude, whereas women have a higher score on the surface and the strategic approach to learning. Also, it is of interest that there seems to be no difference between the genders in terms of exam performance. In terms of demographics, we may note that most students are young and roughly in their twenties.
 
 Since the association between attitude and points is the one clearly popping out, let us
 look at a larger visual of the scatter plot with a fitted regression line.
