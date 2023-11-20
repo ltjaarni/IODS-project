@@ -1,0 +1,249 @@
+# A case study in logistic regression and cross-validation
+
+_In the following, we will see whether or not we can predict alcohol consumption_
+_of pupils in secondary school in Portugal by a set of predictors on their background and_ _their school performance. We will categorize our outcome variable into two classes, high_
+_consumption and its complement class. We will fit a logistic regression model for our_
+_classification task. We will also take a brief look at the topic of cross-validation._
+
+In the following, we work with a dataset that is openly available from the UC Irvine Machine
+Learning Repository. It is a dataset comprising of two original tables measuring secondary school pupils' background, study performance and other variables of interest for educational sciences and policy. We have preprocessed the data so that we have joined the two tables together for all those pupils we have identified as having answered both the two questionnaires that formed the originally distinct datasets. For those questions that these
+pupils have provided discordant answers to in the two datasets, we have either used an average value over the two datasets, if the items are numeric, or else just taken the first value of the two provided answers. 
+
+```{r, echo=FALSE}
+date()
+```
+
+We first read in the analysis dataset in which we have joined the two original datasets.
+We also take a glimpse at the dataset.
+
+```{r, warning=FALSE}
+
+# We require the library readr for reading in our dataset
+library(readr)
+
+# Read the file into the workspace
+alc<-read_csv("~/Intro_to_ODS/IODS/data/alc.csv")
+
+# We print the names of the variables in the dataset
+colnames(alc)
+
+# We require dplyr for glimpse
+library(dplyr)
+
+# We provide a glimpse of the dataset
+glimpse(alc)
+```
+
+We may note that the dataset is rather rich: it contains 35 variables, many of which
+might be predictive of alcohol consumption. The names of the variables provide good indication on the type of data on the secondary shool pupil we have at our disposal: the school the pupil attends, the gender, the age, family size, whether parents live together, mother's education, father's education, mother's job, father's job, reason to choose the school one attends, who is the pupil's guardian etc. Most of the variables can be characterized as sort of ''background variables'': they are, for the most part, not potential outcomes of interest for the educational scientist. Most notable exceptions are, perhaps the variables having to do with educational attainment: failed courses, absences, and the grades from the first and second period as well as the final grade (G1, G2, G3, respectively: in joining the datasets we have averaged the grades from the portuguese and the math classes).
+
+One might also be interested in understanding, explaining and predicting the phenomenon of alcohol consumption, and, instead the outcomes on educational attainment, that is what we are to delve into in the next.
+
+We have an abundance of variables that might be of interest in understanding the phenomenon of alcohol consumption among secondardy school pupils and or predicting it. We could proceed in a data-driven fashion and aim to identify predictors with most predictive power by exploratory data analysis. Instead, we start from a more "theory-laden" perspective, identifying variables that would seem likely to be associated with our outcome of interest prior to taking any closer look at the data. Even though we are no genuine substance-matter experts here, we may nonetheless have some valuable life experience of our own that may help inform us where to look when trying to understand or predict alcohol consumption of an adolescent.
+
+We thus hypothesize that men consume more than women, and choose gender as one of our predictors of interest. We further hypothesize that those whose parents have split up tend
+to drink more. Socioeconomic status is likely to have an effect as well, so that we might we well-advised to construct a composite indicator based on the likes of parents' education and work status. However, we hypothesize that much of the predictive power that the socioeconomic status might have, is captured by the dichotomy of whether or not the pupil plans to attend higher education, so we choose that as our second predictor of interest with the associated hypothesis that those planning not to attend higher education consume more alcohol. We further postulate that alcohol consumption, for adolescents, is a form of social activity, so we choose ''going out with friends'' as our third potential predictor of interest. This is a variable measured on an ordinal scale, with 1="very low" and 5="very high", supposedly meaning that a value of 5 means one goes out with friends a lot. We treat the predictor, however, as if it were interval-scaled, and postulate that higher values are associated with increased alcohol consumption. We further postulate that absences from school and the quality of family relationships might be associated with alcohol consumption. We choose the latter, if only because it involves less preprocessing: absences being an integer-valued variable with range from 0 to 93, one might be well-advised to look more closely into the classes of levels of absence that matter. Family relationships is an ordinal variable ranging from 1="very bad" to 5="excellent", yet we treat it as if it were interval-valued, and hypothesize that better family relations are associated with lower alcohol consumption.
+
+Final note before proceeding. We could approach logistic regression modelling with high alcohol consumption as the outcome of interest from roughly two perspectives: understanding some relationship an area of life of the adolescent has with that of his alcohol use; or, aiming to most adequately explain or predict that alcohol use. In the former case, we could restrict attention to, say, one perpective, such as "family background". We could then choose predictors that fall exclusivel within this class. On the latter perspective, instead, we would be well-advised to proceed by identifying those dimensions of the life and background of the secondary school pupil most closely related with alcohol consumption, the choose a single (perhaps a composite such) predictors from each such distinct dimension, and use those as the predictors in one's model. In so doing, we would be following a heuristic for maximizing predictive performance: summarizing the correlated predictors in a single predictor, and picking all those distinct sets of such predictors that might independently explain or predict our outcome of interest.
+
+We have, strictly speaking, not followed either of these strategies in their pure forms, although our approach leans more on the ''predictive'' than the ''understanding'' function. We also note that we have painted a rather dim perspective on alcohol consumption, and that we risk missing some of the phenomenon in treating it so heavily as indicating other problems that the pupil might have.
+
+We start by producing some simple summaries of the dataset in line with our dichotomous outcome of interest and our four predictors, two of which are binary and two of which are integer-valued (and treated as interval-scale).
+
+We first look at each predictor separately with the outcome.
+
+We start by looking at hich alcohol consumption by sex.
+
+```{r, warning=FALSE}
+# Produce proportions of high-alcohol use by sex
+table(high_use=alc$high_use, sex=alc$sex) %>% prop.table() %>% addmargins()
+
+```
+The proportions provided in the table indicate that sex is associated with high alcohol
+consumption, and it is indeed so in the way that we hypothesized: men have a higher proportion of ''heavy drinkers'' than do women (note that this is based on their self-reported values). 40% of men pupils in the dataset fall within this category, while only roughly 20% of the women do.
+
+We have the following bar-plot to visualize the above and provide the counts.
+
+```{r, warning=FALSE}
+
+# We require the library ggplot2 for visuals
+library(ggplot2)
+
+# Initialize a plot of 'high_use'
+g <- ggplot(data = alc, aes(x=high_use))
+
+# draw a bar plot of high_use by sex
+g<-g + geom_bar()
+
+# add the sex  
+g + facet_wrap("sex")
+
+```
+
+We reproduce the above for the case of planning to attend higher education.
+
+```{r, warning=FALSE}
+# Produce proportions of high-alcohol use by planning to attend higher education
+
+table(high_use=alc$high_use, higher=alc$higher) %>% prop.table() %>% addmargins()
+
+```
+While out of those that do not plan to attend higher education in our sample, roughly 55% have a high-consumption of alcohol, this predictor is unfortunately likely not to be of much use in our classification task, since it is what one might call a ''near zero variance'' predictor, since, surprisingly (is the school some elite school, perhaps?), almost all pupils plan to attend higher education. The inclusion of this predictor in our model might even turn out detrimental, since it might result in a failure of convergence for our maximum-likelihood regression coefficient estimates -- a case which is quite common in logistic regression.
+
+In terms of our prior hypothesis, the observed association in our sample is in the direction we hypothesized: if one is not planning to attend higher education, one is more likely to fall in the class of ''high alcohol consumption''. However, the partition of our dataset that is not planning to attend higher education is so small, that one cannot make much of the hypothesized association.
+
+```{r, warning=FALSE}
+
+# We require the library ggplot2 for visuals
+library(ggplot2)
+
+# Initialize a plot of 'high_use'
+g <- ggplot(data = alc, aes(x=high_use))
+
+# draw a bar plot of high_use by plan to attend higher education
+g<-g + geom_bar()
+
+# add the higher education plan dichotomy 
+g + facet_wrap("higher")
+
+```
+
+We next take a look at the association of ''going out with friends'' with that of high alcohol consumption.
+
+First, a simple table of the counts and the means.
+
+```{r, warning=FALSE}
+# Produce summary statistics by group
+
+alc %>% group_by(high_use) %>% summarise(count=n(),mean_goout=mean(goout))
+
+```
+We see that the sample mean for ''going out with friends'' is clearly higher in the category of those with high alcohol consumption, as we hypothesized it would be. The mean does not tell much of the overall distribution, so let us take a look at a visual that can do that.
+
+```{r}
+# We require library ggplot2 for the visuals 
+library(ggplot2)
+
+# Initialize a plot of 'high_use'
+g <- ggplot(data = alc, aes(x=goout))
+
+# Draw a bar plot of high_use by plan to attend higher education
+g<-g + geom_bar()
+
+# add the higher education plan dichotomy 
+g + facet_wrap("high_use")
+
+```
+We may observe that the bar-plots have opposite ''skews'': those that fall within the ''high consumption'' group have more of the high value of ''going out with friends''; while those in the ''not-high consumption'' group have more of the low values.
+
+So our data is aligned with our hypothesis, yet again. We also observe, however, that we ought perhaps not treat our integer-valued and ordinal ''going out with friends'' -predictor as if it were interval-valued in our model, since a unit increase in our predictor does not seem to have a constant multiplicative effect on the odds of our outcome event of interest. 
+
+We print the table for the counts to back up our visual and the conclusions from it.
+
+```{r, warning=FALSE}
+# Produce proportions of high-alcohol use by planning to attend higher education
+
+table(high_use=alc$high_use, goout=alc$goout) %>% addmargins()
+
+```
+
+We could pretty much lump the predictor categories 1,2 and 3 into a single category, and keep the 4 and 5 as the other two in our newly introduced trichotomy. This would reduce some of the information we have, though, since the categories 1,2 and 3 are not strictly speaking on par. It is best to treat the predictor as a factor, so we add it to our data and use it as a factor in our model.
+
+```{r, warning=FALSE}
+# Add goout as factor
+alc <- mutate(alc, goout_fac=as.factor(goout))
+
+```
+
+Finally, we take a look at our ''family relations'' variable and its relation with our dichotomous outcome of interest.
+
+```{r, warning=FALSE}
+# Produce summary statistics by alcohol consumption dichotomy
+
+alc %>% group_by(high_use) %>% summarise(count=n(),mean_famrel=mean(famrel))
+
+```
+We observe that the mean of our ''family relations'' variable is lower for those falling in the ''high alcohol consumption'' group, as we hypothesized. Let's take a look at the bar plot to display the distribution partitioned by our alcohol consumption dichotomy.
+
+```{r}
+# We require library ggplot2 for the visuals 
+library(ggplot2)
+
+# Initialize a plot of 'high_use'
+g <- ggplot(data = alc, aes(x=famrel))
+
+# Draw a bar plot of high_use by plan to attend higher education
+g<-g + geom_bar()
+
+# add the higher education plan dichotomy 
+g + facet_wrap("high_use")
+
+```
+
+These look quite similar.
+
+```{r, warning=FALSE}
+# Produce proportions of high-alcohol use by planning to attend higher education
+
+table(high_use=alc$high_use, famrel=alc$famrel) %>% addmargins()
+
+```
+
+We may observe that our class with a value of 1 for family relations is very small, so we decide to combine it with the class that have a value of 2. We further turn the variable into a factor, as we did in the previous, for similar reasons as in the previous.
+
+Note that we have not turned the factor into an _ordered_ factor. So our logistic regression will not treat it as if it were ordinal, but as if it were categorical. By so doing, we fail to account for some of the inherent structure in our dataset. Yet we allow each coefficient of a factor level to be interpreted relative to the baseline level of that factor.
+
+```{r, warning=FALSE}
+# Recode famrel so that we combine values 1 and 2 into a value of 1
+alc<- mutate(alc, famrel=recode(famrel, '1'=1, '2'=1, '3'=2, '4'=3,'5'=4))
+alc<- mutate(alc, famrel_fac=as.factor(famrel))
+```
+
+We note that it would usually be good to explore the multidimensional relationships between the predictors and the outcome variable prior to regression modeling. However, since we treat none of our predictors as numeric, our multidimensional visuals tend to become disorderly. Thus we settle for these and proceed to modeling.  
+
+Logistic regression is a generalized linear model that uses the logit as its link function.
+
+This means that we would have the following form for our logistic regression model with four predictor variables:
+
+$\log({\frac{p}{1-p}})=b_0 + b_1x_1 + b_2x_2 + b_3x_3 + b_4x_4$,
+
+if we did not utilize factor variables, as we of course do, where each level of a factor, except the baseline level of the factor, is equipped with its own regression coefficient. The logit link function is handy in terms of the intuitive interpretation it offers for the exponential of the regression coefficient estimate as the odds ratio. This means that, a unit increase in the predictor variable, say $x_1$, is associated with $b_1$-fold increase in the odds, $\frac{p}{1-p}$, of the event. In our case the event is ''high alcohol consumption'', and each $\exp(b)$, is comparative with respect to the baseline level of its factor. R in essence dummy-codes our factor levels for us so that ''a unit increase'' amounts simply to a shift from the baseline level of the factor to the level of the predictor that our regression coefficient denotes. So if, say, $\exp(b_4)=2$, then the odds of ''high alcohol consumption'' are two-fold for $x_4$ relative to its baseline level.  
+
+```{r}
+
+# find the model with glm()
+m <- glm(high_use ~ famrel_fac + goout_fac + higher + sex, data = alc, family = "binomial")
+
+summary(m)
+
+```
+
+We note that we have the correct amount of regression coefficient estimates, one less for each factor variable than the amount of the levels it has. The baseline for ''family relations'' is the level ''1'', which denotes ''very bad'' or ''bad'' family relations. The baseline for ''going out with friends'' is also ''1'', which denotes a ''very low'' value. The baseline for planning to go attend higher education is not planning to attend, and the baseline for male sex is female sex. We note that only a few of the levels have a statistically significant regression coefficient estimate associated with them. These are ''family relations'' with value ''excellent''; going out with values ''high'' and ''very high'' as well as the male sex. For all of these, the order is as had been hypothesized: the first in the list decreasing the odds of high consumption, the following three increasing it, _when holding all of the other predictors in the model constant_.
+
+But before interpreting the regression coefficient estimates, we should exponentiate these, so that we may utilize the ease of the odds-ratio interpretation. We also derived the 95% confidence intervals for the exponentials of the coefficient estimates. 
+
+```{r}
+
+# find the model with glm()
+m <- glm(high_use ~ famrel_fac + goout_fac + higher + sex, data = alc, family = "binomial")
+
+# compute odds ratios (OR)
+OR <- coef(m) %>% exp
+
+# compute confidence intervals (CI)
+CI <- confint(m) %>% exp
+
+# print out the odds ratios with their confidence intervals
+cbind(OR, CI)
+
+
+```
+So an OR of 1 means that the odds are pretty much on par relative to the comparator of the baseline level. We notice that, as of course roughly should be, the predictors we found to be statistically significant with a two-sided test of the null of ''nil association'' (here OR of 1) in the above, are the ones the confidence interval of which does not contain the value 1. For ''famrel_fac4'' the upper bound is below 1 (indicating a decrease in odds comparative to the baseline); for ''goout_fac4'' and ''goout_fac5'' the lower bounds are above 1 (indicating an increase in odds comparative to the baseline); as it is for the male sex (indicating an increase in odds of the event in comparison to the baseline provided by the female sex).
+
+We infer that our best point estimate is that ''excellent'' family relations decrease the odds of high alcohol consumption by a factor of 0.3. in comparison to the baseline of ''bad'' or ''very bad'' relations (when other predictors in the model our held constant). Our associated interval estimate with a 95% confidence level is from roughly 0.1 to 0.9 -fold decrease in odds.
+
+Our best estimate for a ''high'' value provided for ''going out with friends'' is that this is associated with roughly a 7-fold increase in odds in comparison to the baseline of a ''very low'' value (when other predictors in the model our held constant), and that we are 95% confident that the odds ratio is between roughly 7 and 32. For a value of ''very high'', we have similar numbers of 10, 3, and 51, respectively.
+
+Being male is associated with roughly a 2.7-fold increase in the odds of high alcohol consumption in comparison to women (when other predictors in the model our held constant). We are 95% confident that the male sex is associated with a 1.6 to 4.7-fold increase in the odds of high alcohol consumption.
+
+Our point estimate for the OR of planning to attend higher education suggests that the odds of high alcohol consumption are decreased 0.6-fold in comparison to the baseline of planning not to attend. However, with the small number of observations in the reference group, we have a wide confidence interval, and cannot reject the null of an OR of 1, as it might very well be as high as roughly 2. However, we note that this issue deserves further study, since the point estimate is suggestive of a substantive effect.
