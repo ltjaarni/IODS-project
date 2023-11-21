@@ -404,7 +404,7 @@ dimensionality reduction and longitudinal analysis.</p>
 analysis:</p>
 <p><a href="https://github.com/ltjaarni/IODS-project" class="uri">https://github.com/ltjaarni/IODS-project</a></p>
 <pre class="r"><code>date()</code></pre>
-<pre><code>## [1] &quot;Tue Nov 21 08:13:04 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Tue Nov 21 08:57:38 2023&quot;</code></pre>
 <p>I am excited to learn more R Markdown and the use of Git. I found the
 course by browsing through the course catalogue for the general studies
 -module for PhD students and found this course to be among the most
@@ -465,7 +465,7 @@ We will treat our integer-valued target variable as if it were a
 continuous, real-valued variable, and use a linear regression model to
 explain and predict the score with these composite dimensions as
 explanatory variables.</p>
-<pre><code>## [1] &quot;Tue Nov 21 08:13:04 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Tue Nov 21 08:57:38 2023&quot;</code></pre>
 <p>We first read in an analysis dataset we have already
 preprocessed.</p>
 <pre class="r"><code># We require the library readr
@@ -863,7 +863,7 @@ the originally distinct datasets. For those questions that these pupils
 have provided discordant answers to in the two datasets, we have either
 used an average value over the two datasets, if the items are numeric,
 or else just taken the first value of the two provided answers.</p>
-<pre><code>## [1] &quot;Tue Nov 21 08:13:11 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Tue Nov 21 08:57:44 2023&quot;</code></pre>
 <p>We first read in the analysis dataset in which we have joined the two
 original datasets. We also take a glimpse at the dataset.</p>
 <pre class="r"><code># We require the library readr for reading in our dataset
@@ -949,27 +949,27 @@ together, mother’s education, father’s education, mother’s job, father’s
 job, reason to choose the school one attends, who is the pupil’s
 guardian etc. Most of the variables can be characterized as sort of
 ‘’background variables’’: they are, for the most part, not potential
-outcomes of interest for the educational scientist. Most notable
-exceptions are, perhaps the variables having to do with educational
+outcomes of interest for the educational scientist. Perhaps the most
+notable exceptions are the variables having to do with educational
 attainment: failed courses, absences, and the grades from the first and
 second period as well as the final grade (G1, G2, G3, respectively: in
 joining the datasets we have averaged the grades from the portuguese and
 the math classes).</p>
-<p>One might also be interested in understanding, explaining and
-predicting the phenomenon of alcohol consumption, and, instead the
+<p>One might, however, also be interested in understanding, explaining
+and predicting the phenomenon of alcohol consumption. Instead the
 outcomes on educational attainment, that is what we are to delve into in
 the next.</p>
 <p>We have an abundance of variables that might be of interest in
-understanding the phenomenon of alcohol consumption among secondardy
-school pupils and or predicting it. We could proceed in a data-driven
-fashion and aim to identify predictors with most predictive power by
-exploratory data analysis. Instead, we start from a more “theory-laden”
-perspective, identifying variables that would seem likely to be
-associated with our outcome of interest prior to taking any closer look
-at the data. Even though we are no genuine substance-matter experts
-here, we may nonetheless have some valuable life experience of our own
-that may help inform us where to look when trying to understand or
-predict alcohol consumption of an adolescent.</p>
+understanding or predicting the phenomenon of alcohol consumption among
+secondary school pupils. We could proceed in a data-driven fashion and
+aim to identify predictors with most predictive potential by exploratory
+data analysis. Instead, we start from a more “theory-laden” perspective,
+identifying variables that would seem likely to be associated with our
+outcome of interest prior to taking any closer look at the data. Even
+though we are no genuine substance-matter experts here, we may
+nonetheless have some valuable life experience of our own that may help
+inform us where to look when trying to understand or predict alcohol
+consumption of an adolescent.</p>
 <p>We thus hypothesize that men consume more than women, and choose
 gender as one of our predictors of interest. We further hypothesize that
 those whose parents have split up tend to drink more. Socioeconomic
@@ -985,34 +985,36 @@ consumption, for adolescents, is a form of social activity, so we choose
 ‘’going out with friends’’ as our third potential predictor of interest.
 This is a variable measured on an ordinal scale, with 1=“very low” and
 5=“very high”, supposedly meaning that a value of 5 means one goes out
-with friends a lot. We treat the predictor, however, as if it were
-interval-scaled, and postulate that higher values are associated with
-increased alcohol consumption. We further postulate that absences from
-school and the quality of family relationships might be associated with
-alcohol consumption. We choose the latter, if only because it involves
-less preprocessing: absences being an integer-valued variable with range
-from 0 to 93, one might be well-advised to look more closely into the
-classes of levels of absence that matter. Family relationships is an
-ordinal variable ranging from 1=“very bad” to 5=“excellent”, yet we
-treat it as if it were interval-valued, and hypothesize that better
-family relations are associated with lower alcohol consumption.</p>
+with friends a lot. We might come to treat the predictor, however, as if
+it were interval-scaled, and postulate that higher values are associated
+with increased alcohol consumption. We further postulate that absences
+from school and the quality of family relationships might be associated
+with alcohol consumption. We choose the latter for our model, if only
+because it involves less preprocessing: absences being an integer-valued
+variable with a range from 0 to 93, one might be well-advised to look
+more closely into the classes of levels of absence that matter for
+prediction. Family relationships is an ordinal variable ranging from
+1=“very bad” to 5=“excellent”, yet we might come to treat it as if it
+were interval-valued, and hypothesize that better family relations are
+associated with lower alcohol consumption.</p>
 <p>Final note before proceeding. We could approach logistic regression
 modelling with high alcohol consumption as the outcome of interest from
 roughly two perspectives: understanding some relationship an area of
-life of the adolescent has with that of his alcohol use; or, aiming to
-most adequately explain or predict that alcohol use. In the former case,
-we could restrict attention to, say, one perpective, such as “family
-background”. We could then choose predictors that fall exclusivel within
-this class. On the latter perspective, instead, we would be well-advised
-to proceed by identifying those dimensions of the life and background of
-the secondary school pupil most closely related with alcohol
-consumption, the choose a single (perhaps a composite such) predictors
-from each such distinct dimension, and use those as the predictors in
-one’s model. In so doing, we would be following a heuristic for
-maximizing predictive performance: summarizing the correlated predictors
-in a single predictor, and picking all those distinct sets of such
-predictors that might independently explain or predict our outcome of
-interest.</p>
+life or a background of the adolescent has with that of his alcohol use;
+or, aiming to most adequately explain or predict that alcohol use. In
+the former case, we could restrict attention to, say, one perpective,
+such as “family background”. We could then choose predictors that fall
+exclusively within that class. On the latter perspective, instead, we
+would be well-advised to proceed by first identifying those dimensions
+of the life and background of the secondary school pupil most closely
+related with alcohol consumption, then choose a single (perhaps a
+composite such) predictor from each such distinct dimension, and use
+those as the predictors in one’s model. In so doing, we would be
+following a heuristic for maximizing predictive performance given that
+we are to include but a fixed amount of predictors (four, in our case):
+summarizing the correlated predictors in a single predictor, and picking
+all those distinct sets of such predictors that might independently
+explain or predict our outcome of interest.</p>
 <p>We have, strictly speaking, not followed either of these strategies
 in their pure forms, although our approach leans more on the
 ‘’predictive’’ than the ‘’understanding’’ function. We also note that we
@@ -1021,8 +1023,7 @@ we risk missing some of the phenomenon in treating it so heavily as
 indicating other problems that the pupil might have.</p>
 <p>We start by producing some simple summaries of the dataset in line
 with our dichotomous outcome of interest and our four predictors, two of
-which are binary and two of which are integer-valued (and treated as
-interval-scale).</p>
+which are binary and two of which are integer-valued.</p>
 <p>We first look at each predictor separately with the outcome.</p>
 <p>We start by looking at hich alcohol consumption by sex.</p>
 <pre class="r"><code># Produce proportions of high-alcohol use by sex
@@ -1056,8 +1057,8 @@ g + facet_wrap(&quot;sex&quot;)</code></pre>
 education.</p>
 <pre class="r"><code># Produce proportions of high-alcohol use by planning to attend higher education
 
-table(high_use=alc$high_use, higher=alc$higher) %&gt;% prop.table() %&gt;% addmargins()</code></pre>
-<pre><code>##         higher
+table(high_use=alc$high_use, higher_educ=alc$higher) %&gt;% prop.table() %&gt;% addmargins()</code></pre>
+<pre><code>##         higher_educ
 ## high_use         no        yes        Sum
 ##    FALSE 0.01891892 0.68108108 0.70000000
 ##    TRUE  0.02432432 0.27567568 0.30000000
@@ -1125,7 +1126,7 @@ consumption’’ group have more of the low values.</p>
 observe, however, that we ought perhaps not treat our integer-valued and
 ordinal ‘’going out with friends’’ -predictor as if it were
 interval-valued in our model, since a unit increase in our predictor
-does not seem to have a constant multiplicative effect on the odds of
+does not seem to have a consistent multiplicative effect on the odds of
 our outcome event of interest.</p>
 <p>We print the table for the counts to back up our visual and the
 conclusions from it.</p>
@@ -1142,7 +1143,7 @@ single category, and keep the 4 and 5 as the other two in our newly
 introduced trichotomy. This would reduce some of the information we
 have, though, since the categories 1,2 and 3 are not strictly speaking
 on par. It is best to treat the predictor as a factor, so we add it to
-our data and use it as a factor in our model.</p>
+our data and use it as a factor instead as numeric in our model.</p>
 <pre class="r"><code># Add goout as factor
 alc &lt;- mutate(alc, goout_fac=as.factor(goout))</code></pre>
 <p>Finally, we take a look at our ‘’family relations’’ variable and its
@@ -1171,7 +1172,8 @@ g&lt;-g + geom_bar()
 # add the higher education plan dichotomy 
 g + facet_wrap(&quot;high_use&quot;)</code></pre>
 <p><img src="data:image/png;base64,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" width="576" /></p>
-<p>These look quite similar.</p>
+<p>These look quite similar in terms of their shape, if not the absolute
+counts.</p>
 <pre class="r"><code># Produce proportions of high-alcohol use by planning to attend higher education
 
 table(high_use=alc$high_use, famrel=alc$famrel) %&gt;% addmargins()</code></pre>
@@ -1204,13 +1206,14 @@ as its link function.</p>
 regression model with four predictor variables:</p>
 <p><span class="math inline">\(\log({\frac{p}{1-p}})=b_0 + b_1x_1 +
 b_2x_2 + b_3x_3 + b_4x_4\)</span>,</p>
-<p>if we did not utilize factor variables, as we of course do, where
-each level of a factor, except the baseline level of the factor, is
-equipped with its own regression coefficient. The logit link function is
-handy in terms of the intuitive interpretation it offers for the
-exponential of the regression coefficient estimate as the odds ratio.
-This means that, a unit increase in the predictor variable, say <span class="math inline">\(x_1\)</span>, is associated with <span class="math inline">\(b_1\)</span>-fold increase in the odds, <span class="math inline">\(\frac{p}{1-p}\)</span>, of the event. In our case
-the event is ‘’high alcohol consumption’‘, and each <span class="math inline">\(\exp(b)\)</span>, is comparative with respect to
+<p><em>if we did not utilize factor variables</em>, as we of course
+exclusively do. In our case, each level of a factor, except the baseline
+level of the factor, is equipped with its own regression coefficient.
+The logit link function is handy in terms of the intuitive
+interpretation it offers for the exponential of the regression
+coefficient estimate as the <em>odds ratio</em>. This means that, a unit
+increase in the predictor variable, say <span class="math inline">\(x_1\)</span>, is associated with <span class="math inline">\(b_1\)</span>-fold increase in the odds, <span class="math inline">\(\frac{p}{1-p}\)</span>, of the event. In our case
+the event of interest is ‘’high alcohol consumption’‘, and each <span class="math inline">\(\exp(b)\)</span>, is comparative with respect to
 the baseline level of its factor. R in essence dummy-codes our factor
 levels for us so that’‘a unit increase’’ amounts simply to a shift from
 the baseline level of the factor to the level of the predictor that our
@@ -1261,14 +1264,15 @@ planning to attend, and the baseline for male sex is female sex. We note
 that only a few of the levels have a statistically significant
 regression coefficient estimate associated with them. These are ‘’family
 relations’’ with value ‘’excellent’‘; going out with values’‘high’’ and
-‘’very high’’ as well as the male sex. For all of these, the order is as
-had been hypothesized: the first in the list decreasing the odds of high
-consumption, the following three increasing it, <em>when holding all of
-the other predictors in the model constant</em>.</p>
+‘’very high’’, as well as the male sex. For all of these, the order is
+as had been hypothesized: the first in the list decreasing the odds of
+high consumption, the following three increasing it, <em>when holding
+all of the other predictors in the model constant</em>.</p>
 <p>But before interpreting the regression coefficient estimates, we
 should exponentiate these, so that we may utilize the ease of the
-odds-ratio interpretation. We also derived the 95% confidence intervals
-for the exponentials of the coefficient estimates.</p>
+odds-ratio interpretation. We also derive the 95% confidence intervals
+for the exponentials of the coefficient estimates (the odds ratios
+attached to each predictor).</p>
 <pre class="r"><code># find the model with glm()
 m &lt;- glm(high_use ~ famrel_fac + goout_fac + higher + sex, data = alc, family = &quot;binomial&quot;)
 
@@ -1303,16 +1307,16 @@ for ‘’goout_fac4’’ and ‘’goout_fac5’’ the lower bounds are above
 for the male sex (indicating an increase in odds of the event in
 comparison to the baseline provided by the female sex).</p>
 <p>We infer that our best point estimate is that ‘’excellent’’ family
-relations decrease the odds of high alcohol consumption by a factor of
-0.3. in comparison to the baseline of ‘’bad’’ or ‘’very bad’’ relations
-(when other predictors in the model our held constant). Our associated
-interval estimate with a 95% confidence level is from roughly 0.1 to 0.9
--fold decrease in odds.</p>
+relations decrease the odds of high alcohol consumption by a
+multiplicative factor of 0.3. in comparison to the baseline of ‘’bad’’
+or ‘’very bad’’ relations (when other predictors in the model our held
+constant). Our associated interval estimate with a 95% confidence level
+is from roughly a 0.1 to a 0.9 -fold decrease in odds.</p>
 <p>Our best estimate for a ‘’high’’ value provided for ‘’going out with
 friends’’ is that this is associated with roughly a 7-fold increase in
 odds in comparison to the baseline of a ‘’very low’’ value (when other
 predictors in the model our held constant), and that we are 95%
-confident that the odds ratio is between roughly 7 and 32. For a value
+confident that the odds ratio is between roughly 2 and 32. For a value
 of ‘’very high’’, we have similar numbers of 10, 3, and 51,
 respectively.</p>
 <p>Being male is associated with roughly a 2.7-fold increase in the odds
@@ -1325,14 +1329,15 @@ suggests that the odds of high alcohol consumption are decreased
 0.6-fold in comparison to the baseline of planning not to attend.
 However, with the small number of observations in the reference group,
 we have a wide confidence interval, and cannot reject the null of an OR
-of 1, as it might very well be as high as roughly 2. However, we note
-that this issue deserves further study, since the point estimate is
-suggestive of a substantive effect.</p>
+of 1, as its truve value might very well be as high as roughly 2.
+However, we note that this issue deserves further study, since the point
+estimate is suggestive of a substantive association.</p>
 <p>We will end by making predictions based on our model. We include all
 our predictor variables in the model, even though planning to attend
 higher education fails to have a statistically significant regression
-coefficient estimate. We will also plot the confusion matrix to assess
-performance.</p>
+coefficient estimate, since it nonetheless is likely to increase our
+predictive power (even if only a little). We will also plot the
+confusion matrix to assess performance.</p>
 <pre class="r"><code># Fit the model
 m &lt;- glm(high_use ~ famrel_fac + goout_fac + higher + sex, data = alc, family = &quot;binomial&quot;)
 
@@ -1374,8 +1379,8 @@ with 70% of the observations non-cases. Out of these, we are able to
 predict <span class="math inline">\(\frac{240}{259}\sim 0.92\)</span>
 (this is the specificity of our classifier). Of the cases, though, we
 are able to predict only but roughly half (this is the sensitivity of
-our classifier). Overall, our prediction accuracy, the proportion of
-correct predictions is: <span class="math inline">\(\frac{240+54}{370}\sim 0.795\)</span>. A baseline
+our classifier). Overall, our prediction accuracy, i.e. the proportion
+of correct predictions is: <span class="math inline">\(\frac{240+54}{370}\sim 0.795\)</span>. A baseline
 model with no predictors would be able to achieve accuracy of <span class="math inline">\(0.7\)</span> by guessing all observations to be
 ‘’non-cases’’ (not-high alcohol consumption). A simple statistical test
 can be used to assess whether our model is significantly better in
@@ -1389,9 +1394,9 @@ prove useful.</p>
 above. This means that we have likely overfitted the model, and its
 performance on a test dataset that the model has not been trained on
 would be lower than what we observed on the training dataset alone. To
-guard one for overfitting, one should use cross-validation techniques.
-One would be well advised to first split the data into a training and a
-test dataset (the latter could comprise of, say, 20% of the
+guard one from overfitting, one should use cross-validation techniques.
+Here, one would be well advised to first split the data into a training
+and a test dataset (the latter could comprise of, say, 20% of the
 observations). Then, one would conduct cross-validation on the training
 dataset, for instance, by leaving aside some proportion of the training
 set for validation on each iteration on which one trains the model by
@@ -1399,16 +1404,17 @@ tuning its parameters to optimize performance on a chosen criterion. One
 would loop through such iterations, by taking a different partitioning
 into training and validation on each iteration. In each of these
 iterations, the model would be assessed in the validation dataset, its
-performance stored, and at the end of the iteration, a summary of the
-performance (usually just the mean performance) across the iterations
-would be provided. One would then choose the best model on the basis of
-this aggregare performance and, finally, evaluate that model against the
-test (‘’holdout’’) dataset to ensure that performance is assessed
-truthfully on a dataset the model has not seen.</p>
+performance stored, and at the end of all of the iterations, a summary
+of the performance (usually just the mean performance) across the
+iterations would be provided. One would then choose the best model on
+the basis of this aggregare performance measure, and, finally, evaluate
+that model against the test (‘’holdout’’) dataset which we had initially
+set aside to ensure that performance be assessed truthfully on a dataset
+the model had not seen in its training phase.</p>
 <p>Now in such a development one would have a collection of classifiers
 and, of course, simple logistic regression would tend not to prevail as
 the best performing method (although, its extention to an elastic net
-penalty found in the glmnet package is already ofter rather good).
+penalty found in the glmnet package is already often rather good).
 Furthermore, accuracy is rarely a good performance criterion to use when
 training the model, especially in the case of a class imbalanced
 classifier, since we should usually like our model to be able to detect
@@ -1421,14 +1427,15 @@ that some types of errors are more costly than others (such as the false
 negatives in comparison to the false positives – just think of a case
 where our classifier is a diagnostic device aiming to detect the
 presense of a disease). Since one always trades off sensitivivity with
-specificity, a good performance measure for a classifier is often the
-area under the ROC-curve (AUC). After having trained and optimized the
-classifier in terms of AUC, one may then proceed to choose an
-appropriate detection level (a probability threshold) for classifying a
-case as such that accounts for the losses attached to the different
-types of errors in the use context.</p>
+specificity, a good standard performance measure for a classifier is
+often the area under the ROC-curve (AUC). After having trained and
+optimized the classifier in terms of AUC, one may then proceed to choose
+an appropriate detection level (a probability threshold) for classifying
+a case as such. This threshold could then be chosen so as to account for
+the losses attached to the different types of errors in the use
+context.</p>
 <p>We may encode our 0-1 loss for the predictions (penalizing 0 in the
-case of a correct predictio and 1 in case of an incorrect one) as below
+case of a correct prediction and 1 in case of an incorrect one) as below
 and observe that our loss is the proportion of incorrect predictions: a
 value which is the negation of the accuracy of our model we calculated
 in the above.</p>
@@ -1463,7 +1470,7 @@ cv &lt;- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
 
 # average number of wrong predictions in the cross validation
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2189189</code></pre>
+<pre><code>## [1] 0.2216216</code></pre>
 <p>We may note that our loss returns a higher value of <span class="math inline">\(0.232\)</span> when assessed across our ten
 cross-validation rounds than it originally did, when the model was
 assessed and fitted on the entire dataset. This is usually the case for
