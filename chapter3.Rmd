@@ -1,12 +1,11 @@
 # A case study in logistic regression and cross-validation
 
 _In the following, we will see whether or not we can predict alcohol consumption_
-_of pupils in secondary school in Portugal by a set of predictors on their background and_ _their school performance. We will categorize our outcome variable into two classes, high_
-_consumption and its complement class. We will fit a logistic regression model for our_
+_of pupils in secondary school in Portugal by a set of predictors on their background and_ _their school performance. We will categorize our outcome variable into two classes: high_
+_consumption, and its complement class. We will fit a logistic regression model for our_
 _classification task. We will also take a brief look at the topic of cross-validation._
 
-In the following, we work with a dataset that is openly available from the UC Irvine Machine
-Learning Repository. It is a dataset comprising of two original tables measuring secondary school pupils' background, study performance and other variables of interest for educational sciences and policy. We have preprocessed the data so that we have joined the two tables together for all those pupils we have identified as having answered both the two questionnaires that formed the originally distinct datasets. For those questions that these
+In the following, we work with a dataset that is openly available from the UC Irvine Machine Learning Repository. It is a dataset comprising of two original tables measuring secondary school pupils' background, study performance and other variables of interest for educational sciences and policy. We have preprocessed the data so that we have joined the two tables together for all those pupils we have identified as having answered both the two questionnaires that formed the originally distinct datasets. For those questions that these
 pupils have provided discordant answers to in the two datasets, we have either used an average value over the two datasets, if the items are numeric, or else just taken the first value of the two provided answers. 
 
 ```{r, echo=FALSE}
@@ -134,7 +133,8 @@ g<-g + geom_bar()
 g + facet_wrap("high_use")
 
 ```
-We may observe that the bar-plots have opposite ''skews'': those that fall within the ''high consumption'' group have more of the high value of ''going out with friends''; while those in the ''not-high consumption'' group have more of the low values.
+
+We may observe that the bar-plots have opposite ''skews'': those that fall within the ''high consumption'' group have more of the high values of ''going out with friends''; while those in the ''not-high consumption'' group have more of the low values.
 
 So our data is aligned with our hypothesis, yet again. We also observe, however, that we ought perhaps not treat our integer-valued and ordinal ''going out with friends'' -predictor as if it were interval-valued in our model, since a unit increase in our predictor does not seem to have a constant multiplicative effect on the odds of our outcome event of interest. 
 
@@ -247,3 +247,80 @@ Our best estimate for a ''high'' value provided for ''going out with friends'' i
 Being male is associated with roughly a 2.7-fold increase in the odds of high alcohol consumption in comparison to women (when other predictors in the model our held constant). We are 95% confident that the male sex is associated with a 1.6 to 4.7-fold increase in the odds of high alcohol consumption.
 
 Our point estimate for the OR of planning to attend higher education suggests that the odds of high alcohol consumption are decreased 0.6-fold in comparison to the baseline of planning not to attend. However, with the small number of observations in the reference group, we have a wide confidence interval, and cannot reject the null of an OR of 1, as it might very well be as high as roughly 2. However, we note that this issue deserves further study, since the point estimate is suggestive of a substantive effect.
+
+We will end by making predictions based on our model. We include all our predictor variables in the model, even though planning to attend higher education fails to have a statistically significant regression coefficient estimate. We will also plot the confusion matrix to assess performance.
+
+```{r}
+
+# Fit the model
+m <- glm(high_use ~ famrel_fac + goout_fac + higher + sex, data = alc, family = "binomial")
+
+# Predict() the probability of high_use
+probabilities <- predict(m, type = "response")
+
+library(dplyr)
+# add the predicted probabilities to 'alc'
+alc <- mutate(alc, probability = probabilities)
+
+# use the probabilities to make a prediction of high_use
+alc <- mutate(alc, prediction = probability > 0.5)
+
+# see the last ten original classes, predicted probabilities, and class predictions
+select(alc, failures, absences, sex, high_use, probability, prediction) %>% tail(10)
+
+# tabulate the target variable versus the predictions
+table(high_use = alc$high_use, prediction = alc$prediction)
+
+
+```
+
+We can see from the confusion matrix that we are able to predict the non-cases (not-high alcohol consumption) rather well, which is not surprising, given the we have an initial setting of a class imbalance, with 70% of the observations non-cases. Out of these, we are able to predict $\frac{240}{259}\sim 0.92$ (this is the specificity of our classifier). Of the cases, though, we are able to predict only but roughly half (this is the sensitivity of our classifier). Overall, our prediction accuracy, the proportion of correct predictions is: $\frac{240+54}{370}\sim 0.795$. A baseline model with no predictors would be able to achieve accuracy of $0.7$ by guessing all observations to be ''non-cases'' (not-high alcohol consumption). A simple statistical test can be used to assess whether our model is significantly better in comparison to this null model, but it is clear that it is even without the test. More important is whether our model is good enough to be useful, and this depends on the use to which our model is to be put. One could already claim that, in general, the increase in accuracy achieved by our model in comparison to the baseline is modest, but could still prove useful.
+
+Our model has been fitted and assessed on the entire dataset in the above. This means that we have likely overfitted the model, and its performance on a test dataset that the model has not been trained on would be lower than what we observed on the training dataset alone. To guard one for overfitting, one should use cross-validation techniques. One would be well advised to first split the data into a training and a test dataset (the latter could comprise of, say, 20% of the observations). Then, one would conduct cross-validation on the training dataset, for instance, by leaving aside some proportion of the training set for validation on each iteration on which one trains the model by tuning its parameters to optimize performance on a chosen criterion. One would loop through such iterations, by taking a different partitioning into training and validation on each iteration. In each of these iterations, the model would be assessed in the validation dataset, its performance stored, and at the end of the iteration, a summary of the performance (usually just the mean performance) across the iterations would be provided. One would then choose the best model on the basis of this aggregare performance and, finally, evaluate that model against the test (''holdout'') dataset to ensure that performance is assessed truthfully on a dataset the model has not seen.
+
+Now in such a development one would have a collection of classifiers and, of course, simple logistic regression would tend not to prevail as the best performing method (although, its extention to an elastic net penalty found in the glmnet package is already ofter rather good). Furthermore, accuracy is rarely a good performance criterion to use when training the model, especially in the case of a class imbalanced classifier, since we should usually like our model to be able to detect the cases. In general, this is just to say that the loss function should not be 0-1 off-the-shelf, so that one accrues a penalty of 1 for each ''miss'' regardless of its type (and zero for a correct prediction). One ought instead construct a loss function that accounts for the context of the use of the model, and in such context, it is invariably the case that some types of errors are more costly than others (such as the false negatives in comparison to the false positives -- just think of a case where our classifier is a diagnostic device aiming to detect the presense of a disease). Since one always trades off sensitivivity with specificity, a good performance measure for a classifier is often the area under the ROC-curve (AUC). After having trained and optimized the classifier in terms of AUC, one may then proceed to choose an appropriate detection level (a probability threshold) for classifying a case as such that accounts for the losses attached to the different types of errors in the use context.
+
+We may encode our 0-1 loss for the predictions (penalizing 0 in the case of a correct predictio and 1 in case of an incorrect one) as below and observe that our loss is the proportion of incorrect predictions: a value which is the negation of the accuracy of our model we calculated in the above.
+
+```{r}
+
+# Define a loss function (mean prediction error)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+# call loss_func to compute the average number of wrong predictions in the (training) data
+
+
+# This is the proportion of wrong predictions
+loss_func(class = alc$high_use, prob = alc$probability)
+
+```
+We may conduct 10-fold cross validation (where on each iteration a different 10% of the training data is used for validation) of our model and assess overall performance with the following code, utilizing the boot-library.
+
+```{r, warning=FALSE}
+
+# define a loss function (average prediction error)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+# compute the average number of wrong predictions in the (training) data
+
+
+# K-fold cross-validation
+library(boot)
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
+
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+
+```
+
+We may note that our loss returns a higher value of $0.232$ when assessed across our ten cross-validation rounds than it originally did, when the model was assessed and fitted on the entire dataset. This is usually the case for reasons we've already gone through, and is an indication of overfitting in the case of our initial model (the net elastic penalty we mentioned would guard against such overfitting, as does cross-validation).
+
+We conlude that our model is decent at best, when evaluated with a loss-function (and a performance criterion) that is usually not the go-to choice. Our model outperforms a null model guessing a non-case each time (which would have accuracy of 0.7).
+
+Note that we would still want to assess the performance of our classifier on a further never-seen-before dataset prior to concluding on final performance.
