@@ -407,7 +407,7 @@ dimensionality reduction and longitudinal analysis.</p>
 analysis:</p>
 <p><a href="https://github.com/ltjaarni/IODS-project" class="uri">https://github.com/ltjaarni/IODS-project</a></p>
 <pre class="r"><code>date()</code></pre>
-<pre><code>## [1] &quot;Thu Nov 23 15:55:38 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Thu Nov 23 16:21:42 2023&quot;</code></pre>
 <p>I am excited to learn more R Markdown and the use of Git. I found the
 course by browsing through the course catalogue for the general studies
 -module for PhD students and found this course to be among the most
@@ -468,7 +468,7 @@ We will treat our integer-valued target variable as if it were a
 continuous, real-valued variable, and use a linear regression model to
 explain and predict the score with these composite dimensions as
 explanatory variables.</p>
-<pre><code>## [1] &quot;Thu Nov 23 15:55:38 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Thu Nov 23 16:21:42 2023&quot;</code></pre>
 <p>We first read in an analysis dataset we have already
 preprocessed.</p>
 <pre class="r"><code># We require the library readr
@@ -866,7 +866,7 @@ the originally distinct datasets. For those questions that these pupils
 have provided discordant answers to in the two datasets, we have either
 used an average value over the two datasets, if the items are numeric,
 or else just taken the first value of the two provided answers.</p>
-<pre><code>## [1] &quot;Thu Nov 23 15:55:45 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Thu Nov 23 16:21:48 2023&quot;</code></pre>
 <p>We first read in the analysis dataset in which we have joined the two
 original datasets. We also take a glimpse at the dataset.</p>
 <pre class="r"><code># We require the library readr for reading in our dataset
@@ -1473,7 +1473,7 @@ cv &lt;- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
 
 # average number of wrong predictions in the cross validation
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2405405</code></pre>
+<pre><code>## [1] 0.2351351</code></pre>
 <p>We may note that our loss returns a higher value of <span class="math inline">\(0.232\)</span> when assessed across our ten
 cross-validation rounds than it originally did, when the model was
 assessed and fitted on the entire dataset. This is usually the case for
@@ -1487,6 +1487,7 @@ each time (which would have accuracy of 0.7).</p>
 <p>Note that we would still want to assess the performance of our
 classifier on a further never-seen-before dataset prior to concluding on
 final performance.</p>
+<hr />
 </div>
 <div id="a-case-study-in-linear-discriminant-analysis-and-k-means-clustering" class="section level1">
 <h1>A case study in linear discriminant analysis and K-means
@@ -1512,7 +1513,7 @@ itself, usually based on some distance measure between the groups
 induced. A classical example is that of K-means clustering where one
 must provide the number of groups for the algorithms, even if not their
 labels. We will look into both approaches in what follows.</p>
-<pre><code>## [1] &quot;Thu Nov 23 15:55:46 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Thu Nov 23 16:21:49 2023&quot;</code></pre>
 <p>We read in the openly available dataset ‘’Boston’’ from the
 MASS-package and take our first look at it.</p>
 <pre class="r"><code># We require the MASS package for our dataset
@@ -1857,20 +1858,20 @@ table(correct = correct_classes, predicted = lda.pred$class)</code></pre>
 ##   med_high   2       7       15    1
 ##   high       0       0        0   23</code></pre>
 <p>We have seem to have quite good classification performance: with the
-correct predictions found on the diagonal, we have a sum total of 70,
-which comes down to an accuracy of <span class="math inline">\(70/102\sim=0.686\)</span>.With a balanced
-baseline, so that all classes are of the same size, withour our
+correct predictions found on the diagonal, we have a sum total of 64,
+which comes down to an accuracy of <span class="math inline">\(64/102\sim=0.628\)</span>.With a balanced
+baseline, so that all classes are of the same size, without our
 predictors and our model, we would have an accuracy of <span class="math inline">\(0.25\)</span>. Compared to that our model
-classifies extremely well.</p>
+classifies very well.</p>
 <p>We get the ‘’high’’ class correctly predicted especially well, with
 all observations of the test set belonging to that category being
 classified correctly. It proves more difficult to us to make the
 distinctions for the two low-groups than the two high groups: when the
 correct class is low, we get our prediction correct with proportion
-<span class="math inline">\(16/26=0.615\)</span>, with <span class="math inline">\(7\)</span> observations predicted to the med_low
+<span class="math inline">\(10/26=0.385\)</span>, with <span class="math inline">\(12\)</span> observations predicted to the med_low
 category; when the correct class is med_low, we get our prediction
-correct <span class="math inline">\(12/26=0.462\)</span> of the time,
-with 14 incorrectly predicted in the low or the med_high category.</p>
+correct <span class="math inline">\(16/28=0.571\)</span> of the time,
+with 12 incorrectly predicted in the low or the med_high category.</p>
 <p>This means that we would be better able to classify observations into
 fewer classes: or, to put it differently, it seems there is relatively
 little in our features that would allow us to distinguish between the
