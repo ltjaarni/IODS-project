@@ -299,4 +299,4 @@ pairs(Boston_scaled2[6:10], col = km$cluster)
 pairs(Boston_scaled2[11:14], col = km$cluster)
 ```
 
-We may note from the plots that we have no difficulties in distinguishing the two clusters from each other: already in the two-dimensional scatter plots we may observe quite clear separation of the group clusters. Here the separation is more evident as before in terms of other pairwise plots than just those including the variable ''black''. 
+We may note from the plots that we have no difficulties in distinguishing the two clusters from each other: already in the two-dimensional scatter plots we may observe quite clear separation of the clusters. Here the separation is more evident as before in terms of other pairwise plots than just those including the variable ''black''. 
