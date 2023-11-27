@@ -19,7 +19,7 @@ str(hd)
 
 # Look at the summary of the variables in the ''human development'' dataset
 summary(hd)
-# The world is a mysterious place, with whopping difference on the country-level. For instance,
+# The world is a mysterious place, with whopping differences on the country-level. For instance,
 # the expected year of education ranges from a little over 4 to a little over 20; life expectancy from
 # 49 to 84.
 
@@ -58,10 +58,10 @@ gii<-rename(gii, "GII"="Gender Inequality Index (GII)",
            "Labo.M"="Labour Force Participation Rate (Male)")
 
 # Create the new variables that are ratios of the proportions of female vs. male population with
-# ceondary education and that participate in the labor market, respectively
+# secondary education and that participate in the labor market, respectively
 gii<-mutate(gii,Edu2.FM = Edu2.F / Edu2.M, Labo.FM = Labo.F / Labo.M)
 
-# Use inner join to merge the two datasets by country
+# Use inner join to merge the two datasets by column ''Country''
 human<-inner_join(hd, gii, by="Country")
 
 # The new table has 195 observations with 19 variables, as should de
