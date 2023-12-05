@@ -1,0 +1,178 @@
+# A case study in principal component and multiple correspondence analysis
+
+_In the following, we will use principal component and multiple correspondence analysis as dimension reduction techniques. We will explore the outputs of the analyses as interesting in their own right, instead merely as intermediaries on the way to further modeling harnessing the components as its possible features. We will use openly available dataset for our exploration._
+
+
+```{r, echo=FALSE}
+date()
+```
+## Load and describe the dataset
+We start by reading in the dataset we label ''human''. The dataset concerns country-level measurements of development for most countries in the world.
+
+```{r, warnings=FALSE}
+library(readr)
+human<-read_csv("~/Intro_to_ODS/IODS/data/human.csv")
+```
+
+We then move the country names to rownames: a neat little trick, since, rather conveniently, the countries uniquely label the observations on the rows.
+
+```{r, warnings=FALSE}
+# Move the country names to rownames
+library(tibble)
+human_ <- column_to_rownames(human, "Country")
+```
+
+Let us explore the data, by summarizing and visualizing it. We first look at the unidimensional summaries and kernel densities.
+
+```{r, warnings=FALSE}
+
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+
+# Let us have the GNI per capita in thousands of dollars to avoid clutter in visuals
+human_$GNI<-human_$GNI/1000
+
+summary(human_)
+
+# draw a kernel plot of each variable
+gather(human_) %>% ggplot(aes(value)) + geom_density() + facet_wrap("key", scales = "free")
+
+```
+
+The distributions are skewed and none appear symmetric nor normal.
+
+There are large differences between the countries in terms of these measures of development, even today. Expected years of education range from 5 to 20; ratio of the proportion of women and men participating in the labour market from roughly 0.2 to a little over 1; the ratio of the proportion of women and men with secondary education from roughly 0.2 to 1.5; life-expectancy from 49 to 83; GNI per capita from roughly 500 to 120 000 dollars per annum; proportion of the female gender in parliament from 0 to 58%;  adolescent birth rate (this is probably in permilles of female adolescents) from 0.6 to over 200 and the maternal mortality ratio from 1 to 1100 (deaths per 100 000 births). 
+
+It is clear that there are high correlations between the variables: as already brought up, they can all be interpreted to fall within the same umbrella of ''development''. They offer different perspectives on the theoretical and contested umbrella concept (what is ''development'', really, and who gets to define it), of course, and it is not a necessity that the measures -- even if conceptually related -- would all be pairwise correlated with each other. But, all in all, even the measures on gender inequality are likely to be associated with the measures that are more squarely those of development, in such a way that a ''more developed'' country is likely to also score higher in gender equality.
+
+Let us take a look at the paiwise correlations in much the same way as we did in the above for the unidimensional distributions: a summary presented in the form of the Pearson sample correlation coefficients, scatter plots, and then a visual capturing the sizes of the correlations in a communicatively efficient manner.
+
+```{r, warnings=FALSE}
+# Access GGally
+library(GGally)
+
+
+# Access corrplot
+library(corrplot)
+
+# Compute the correlation matrix and visualize it with corrplot
+cor(human_)
+# Visualize the scatter plots of the variables
+ggpairs(human_, mapping = aes())
+# Draw the correlation plot with method circle
+corrplot(cor(human_), method="circle", type="upper", cl.pos="b", tl.pos="d", tl.cex=0.6)
+```
+
+We note that some measures of inequality have numbers increasing in an ascending order with gender inequality, when this is understood as the extent to which women participate and are empowered in the society (note that there are a few countries and measures on which women are doing better than men). So when Edu2.FM increases, the proportion of women (in comparison to that of men) with secondary education increases; and the same holds for Labo.FM. The direction is the same for Parli.F (which is, unlike the two just mentioned, not a ratio of proportions but a proportion). The direction is reversed for maternal mortality and adolescent birth rate: the higher the value, the worse the situation in terms of inequality (and I guess also development, ceteris paribus).
+
+Equipped with the understanding of the directions of the variables, and the fact that blue represents negative and red positive correlation (and the size of the circle increases with the absolute value of the correlation), we immediately notice from our visual of the correlation matrix that there are strong correlations in just the directions we hypothesized there to be: the measures that have values increasing along the level of development (GNI, life expectancy, expected years of education, proportion of women relative to men having secondary education) are positively correlated with each other, and negatively correlated with the values that have the opposite direction (adolescent births and maternal mortality) relative to the level of development. Adolescent births and maternal mortality are also highly positively correlated with each other.
+
+However, what is most striking is that while in terms of all those variables mentioned in the previous paragraph, the Pearson correlation coefficients are remarkably high, with an absolute value almost unflinchingly above 0.4, women's participation at the labour market and at the parliament have surprisingly low correlations with the other measures of development. What first comes to mind as a potential explanation for the surprise are some of the richer Arab countries, which probably have a very ''low'' score on these two measures of gender equality, while a high score on the rest (but how about education then?). One should probe more closely into the data to find out (conveniently we have just deleted what appear to have been aggregate measures on regions such as the Arab countries).
+
+Let us see what principal component analysis has to say about this. Principal component analysis is a dimension reduction technique that, when used as a tool for deriving composite predictors capturing the predictive import of the original dataset, could be thought of as a formalization of the following heuristic: construct a linear transformation of the original variables in such a way that captures as much as possible of the variability in the dataset; repeat, but with a linear transformation that is uncorrelated to the previous; stop when satisfied with the count of the components and their ability to capture the information of use in the dataset. In high-dimensional settings, PCA can be useful for many things: understanding variability in the dataset in a simplified form; visualizing multidimensional variability on but two or three dimensions the human mind is capable of visuall comprehending; reducing dimensions for further explanatory or predictive modeling.
+
+We fit our PCA with the stats-package using the singular value decomposition method in the function prcomp. We plot the two first principal components (those capturing the most variability of the dataset) as a biplot. We start by utilizing our human dataset _without standardizing it_, so that our principal components are derived from the covariance instead the correlation matrix. In this case, the scales on which the variables are measured might have quite the big impact on the results, especially if there exists such a variable whose variance dominates the rest in its non-standardized scale. This variable might then appear to explain most of the multidimensional covariance, in which case we would likely have effectively failed to reach the objective of our dimension reduction, since we would have pretty much discarded the variability in the rest of our variables. For comparability with the results from our peers, we rescale our GNI variable to its original scale.
+
+```{r, warnings=FALSE}
+
+# Rescale GNI to original scale
+human_$GNI<-human_$GNI*1000
+
+# Perform principal component analysis (with the SVD method)
+pca_human_ <- prcomp(human_)
+
+# Create and print out a summary of pca_human
+s <- summary(pca_human_)
+
+# Rounded percentanges of variance captured by each PC
+pca_pr <- round(1*s$importance[2, ], digits = 5)
+
+# Print out the percentages of variance
+pca_pr <-round(100*pca_pr,digits=1)
+
+# Create object pc_lab to be used as axis labels
+pc_lab<-paste0(names(pca_pr), " (", pca_pr, "%)")
+
+# Draw a biplot
+biplot(pca_human_, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+
+```
+
+Basically we have just the case we speculated in the above, and which we also foresaw to probably end up concerning GNI, for which reason we rescaled it to its original scale. In short, GNI is what drives the multdimensional variability in the non-standardized scale, but this is not a conceptually meaningful analysis, but a happenstance of a sort, created by the differences in the natural scales of the variables. These differences in the scales result in the output of the non-standardized principal component analysis being determined by what variable ''happens to have'' a scale with large variance. Although there of course are cases where one wants to conduct the analysis in the original scales, that carry the ''natural interpretation'' of the variable, it is usually advisable to standardize, so that the differences in the measurements are interpreted in a manner that accounts for the differences of the scales. Ultimately this comes down to evaluating how big is a big difference in the problem context. With our dataset, with measurements of quite the motley bunch with largely varying natural scales, it does not make much sense to reduce dimensionality without standardizing. For instance, a difference in the GNI of two countries, denote this $x_{2,GNI}-x_{1,GNI}$, is _not large_, nor conceptually meaningful, in comparison to the difference in the maternal mortality of two countries, denote this $x_{2,MAT}-x_{1,MAT}$, just because $x_{2,GNI}-x_{1,GNI}>>x_{2,MAT}-x_{1,MAT}$. For we might then interpret that a difference between two countries of 400 dollars per annum in their GNI is _much larger_ in comparison to their difference of 200 deaths per 100 000 births. Instead, at least for our present purposes, it is much more meaningful to interpret the difference _after accounting for the differences in the scales_ and standardize so that the former difference is roughly 0.02 standard deviations and the latter 1 standard deviation. We would thereby be led to conclude that the difference between the maternal mortality ratios of the two countries is in effect much larger than the difference between their GNIs.    
+
+By printing the summary of the principal components we get the numbers for what we have visually depicted in the above: the first principal component - dominated by GNI - captures almost all of the variability in the entire dataset, with pretty much nothing left for the remaining components (and ergo we get a warning message of ''zero length arrow''). 
+
+```{r, warnings=FALSE}
+summary(pca_human_)
+```
+
+By printing out and looking at the component loadings we see that the first principal component is but a reflection of the GNI: all other loadings are practically zero, where as that of GNI is practically -1.
+
+```{r, warnings=FALSE}
+pca_human_$rotation
+```
+
+So it is clear that our results our meaningless, unless we standardize our variables. So let us do just that and see what impact this has on our results.
+
+```{r, warnings=FALSE}
+
+# Standardize the human dataset
+human_std <- as.data.frame(scale(human_))
+
+# Perform principal component analysis (with the SVD method)
+pca_human_std <- prcomp(human_std)
+
+# Save the summary for plotting purposes
+s_std<-summary(pca_human_std)
+
+# Rounded percentanges of variance captured by each PC
+pca_pr <- round(1*s_std$importance[2, ], digits = 5)
+
+# Print out the percentages of variance
+pca_pr <-round(100*pca_pr,digits=1)
+
+# Create object pc_lab to be used as axis labels
+pc_lab<-paste0(names(pca_pr), " (", pca_pr, "%)")
+
+# Draw a biplot
+biplot(pca_human_std, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+
+```
+
+This has the general appearance we expect, but there are so many countries that their names tend to hide the arrows depicting the relationships between our variables and our components. So let us make these names a bit smaller (a better alternative might be to plot but a sample of the names). Also, the names of the variables are too large, so we reduce their size as well.
+
+```{r, warnings=FALSE}
+
+# Draw a biplot
+biplot(pca_human_std, cex = c(0.5, 0.75), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+
+```
+
+We observe that roughly 54% of the variance is captured by our first principal component (on the x-axis), and 16% by our second component (on the y-axis). We may readily observe from the plot that it depicts the correlation structure we verbally described earlier rather well. What we have is the first principal component comprised of the highly correlated indicators of development, so that those variables with different direction have opposite signs. High maternal mortality and adolescent birth is associated with lower development levels overall; whereas the opposite holds for higher expected life-years, longer education, higher gross national income and a higher proportion of women with secondary education (relative to the similar proportion of men). We then have the second component mostly made up of the proportion of women that participate in the labour market (as opposed to the similar proportion of men) and the representation of the female gender in the parliament. This is aligned with what we found earlier: that these two variables are pretty much uncorrelated with the rest.
+
+We may print out the component loadings to observe the numbers behind the structure we have verbally described in the above. We note that the two components are indeed rather neatly distinguished by these two sets of variables: the loadings are low on the first component in terms of the variables dominating the second component (Labo.FM and Parli.F), and vice versa. We note that together the first two components explain only 70% of the variance: thus the third component is also of interest (in fact, each additional component from 3 to 6 are accompanied by a rather constant added value in terms of the percentage points of variance explained, so that the third component adds roughly 10, the fourth 8, the fifth 5 and the sixth 4 percentage points). As the second, the third component reflects most the Labo.FM and the Parli.F variables, but with the former of the opposite sign than in the second component. In fact, almost all of the other variables besides Parli.F have loadings with opposite terms to those they have on the second component. The absolute values of the loadings of these variables also tend to be higher on the third than the the second component. The fourth component mostly reflect the variables Edu2.FM and GNI.
+
+```{r, warnings=FALSE}
+# Print summary
+s_std
+
+# Print loadings
+s_std$rotation
+```
+
+The loadings of the first two components are perhaps best interpreted from the biplot and the names of the countries that are distinguished by their first two component values.
+
+Here we do in fact observe pretty much what we speculated earlier as explanatory of the surprisingly low correlation between the other indicators of development (and gender inequality, if this is not considered within the umbralle of ''development'') and female participation in the labour market and in the parliament. It is mostly the Arab countries that stand out as a group of their own in the south-west corner of our area mapped by the coordinates of our first two principal components. In the southeast quadrant we have relatively few countries that are characterized by low representation of the female gender at both the labor market and in politics, accompanied by a low level of development in terms of education, life-expectancy, income, maternal mortality and adolescent births. In the northeast quadrant, we have the countries with high levels of participation of the female gender at the labor market and in the parliament, but a low-level of development otherwise. Finally, in the northwest quadrant we have the developed countries with high levels of gender equality, with those furthest away from the origo on that diagonal the Nordic countries along other Western, highly-developed liberal democracies (such as Belgium).
+
+Let us add captions to the plot to indicate the interpretations we have provided for our quadrants in terms of our first two principal components. We use the package AMR, since this allows us to neatly handle the biplot as a ggplot object, which will then also help us create a more pleasing outlook. The downside is that the principal components are standardized by default, and it appears this cannot be changed, so we have a minor inconvenience with the mismatch of the axis-values with those of our previous biplots.
+
+```{r, warnings=FALSE}
+# We require the AMR library for handling the biplot as ggplot object (or "devtools")
+library(AMR)
+
+biplot<-ggplot_pca(pca_human_std, labels=rownames(pca_human_std$x),labels_textsize=2.5,
+                   arrows_textsize=3,arrows_size=0.7)
+biplot + geom_label(label="High standard of living; High gender equality", x=-0.9, y=2.8, size=2.5) + geom_label(label="Low standard of living; High gender equality",, x=2.2, y=2.8, size=2.5) + geom_label(label="High standard of living; Low gender equality",, x=-0.9, y=-2.6, size=2.5) + geom_label(label="Low standard of living; Low gender equality",, x=2.2, y=-2.6, size=2.5)
+```
+

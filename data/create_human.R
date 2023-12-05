@@ -1,6 +1,6 @@
 # Leo Aarnio, 2023/11/23, data wrangling in assignment 4
 
-
+# ASSIGNMENT 4 CODE CHUNK, GO DOWN TO FIND ASSIGNMENT 5
 # Read in the two dataset: ''human development'' and ''gender inequality''
 
 # We require readr library for read_csv function
@@ -50,7 +50,7 @@ hd<-rename(hd, "HDI"="Human Development Index (HDI)",
 # Then for gii
 gii<-rename(gii, "GII"="Gender Inequality Index (GII)", 
            "Mat.Mor"="Maternal Mortality Ratio",
-           "Edo.Birth"="Adolescent Birth Rate",
+           "Ado.Birth"="Adolescent Birth Rate",
            "Parli.F"="Percent Representation in Parliament",
            "Edu2.F"="Population with Secondary Education (Female)",
            "Edu2.M"="Population with Secondary Education (Male)",
@@ -68,3 +68,84 @@ human<-inner_join(hd, gii, by="Country")
 
 # Save the dataframe into csv in the data folder
 write_csv(human,"~/Intro_to_ODS/IODS/data/human.csv")
+
+# ----------------------------------------------------------------
+
+# ASSIGNMENT 5 CODE CHUNK
+
+# Leo Aarnio, 2023/12/1, 
+# Link to data: https://raw.githubusercontent.com/KimmoVehkalahti/Helsinki-Open-Data-Science/master/datasets/human1.csv"
+
+# Read in the dataset created last week
+# we require readr for this
+library(readr)
+human<-read_csv("~/Intro_to_ODS/IODS/data/human.csv")
+
+# Look at the dimensions
+dim(human)
+# 195 rows of observations of 19 variables
+
+# Look at the structure
+str(human)
+# numeric measurements that concern the level of development of countries.
+# HDI is a componsite index of human development,
+# HDI rank is the rank of the country on the HDI
+# Life.exp measures life-expectance at birth
+# Edu. exc measures expected years of education
+# Edu. mean measures mean of education
+# GNI measures gross national income per capita
+# GII is a composite gender inequality index
+# GII rank is the rank of the country on the GII
+# Mat.mor measures maternal mortality
+# Ado.Birth measures adolescent birth rate
+# Parli.F female representation in parliament
+# Edu2.F measures the proportion of women with a secondary education
+# Edu2.M measures the proportion of men with a secondary education
+# Edu2.FM is the ratio of the above two (with F. the numerator)
+# Labo.F measures proportion of women that are part of the labour force
+# Labo.FM is the ratio of the above two (with F. the numerator)
+# Labo.M measures the proportion of men that are part of the labour force
+
+# Require dplyr for preprocessing
+library(dplyr)
+
+# Name the variables to keep and store in a character vector
+keep<-c("Country", "Edu2.FM", "Labo.FM", "Edu.Exp", "Life.Exp", "GNI", "Mat.Mor", "Ado.Birth", "Parli.F")
+
+# Keep the variables named in the human datase (drop all others)
+human<-dplyr::select(human, one_of(keep))
+
+# Count of missing values
+sum(is.na(human))
+# 55 missing values - not much
+
+# Identify rows that have at least one missing value
+complete.cases(human)
+
+# Keep rows that do not have missing values (with value TRUE for complete.case)
+human <- filter(human, complete.cases(human))
+
+# Count of missing values
+sum(is.na(human))
+# 0 missing values, so everything in order
+
+# The regions that are not countries are in the tail of the dataset
+tail(human, n=10)
+
+# These are the regions from Arab States to World: 7 last rows in the dataset
+# Since we do not know what 162-7 amounts to we let R calculate it for us
+n_countryrows<-nrow(human)-7
+
+# Keep the rows prior to that
+human<-human[1:n_countryrows,]
+
+# check that everything is in order
+tail(human,n=10)
+# Looks good: the last row is that of Niger
+
+# Save the dataset to data folder
+write_csv(human,"~/Intro_to_ODS/IODS/data/human.csv")
+
+#check the dataset is stored as should be
+rm(human)
+human<-read_csv("~/Intro_to_ODS/IODS/data/human.csv")
