@@ -427,7 +427,7 @@ dimensionality reduction and longitudinal analysis.</p>
 analysis:</p>
 <p><a href="https://github.com/ltjaarni/IODS-project" class="uri">https://github.com/ltjaarni/IODS-project</a></p>
 <pre class="r"><code>date()</code></pre>
-<pre><code>## [1] &quot;Tue Dec 05 08:56:49 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Tue Dec 05 09:03:57 2023&quot;</code></pre>
 <p>I am excited to learn more R Markdown and the use of Git. I found the
 course by browsing through the course catalogue for the general studies
 -module for PhD students and found this course to be among the most
@@ -488,7 +488,7 @@ We will treat our integer-valued target variable as if it were a
 continuous, real-valued variable, and use a linear regression model to
 explain and predict the score with these composite dimensions as
 explanatory variables.</p>
-<pre><code>## [1] &quot;Tue Dec 05 08:56:49 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Tue Dec 05 09:03:57 2023&quot;</code></pre>
 <p>We first read in an analysis dataset we have already
 preprocessed.</p>
 <pre class="r"><code># We require the library readr
@@ -886,7 +886,7 @@ the originally distinct datasets. For those questions that these pupils
 have provided discordant answers to in the two datasets, we have either
 used an average value over the two datasets, if the items are numeric,
 or else just taken the first value of the two provided answers.</p>
-<pre><code>## [1] &quot;Tue Dec 05 08:56:55 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Tue Dec 05 09:04:03 2023&quot;</code></pre>
 <p>We first read in the analysis dataset in which we have joined the two
 original datasets. We also take a glimpse at the dataset.</p>
 <pre class="r"><code># We require the library readr for reading in our dataset
@@ -1493,7 +1493,7 @@ cv &lt;- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
 
 # average number of wrong predictions in the cross validation
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2216216</code></pre>
+<pre><code>## [1] 0.2378378</code></pre>
 <p>We may note that our loss returns a higher value of <span class="math inline">\(0.232\)</span> when assessed across our ten
 cross-validation rounds than it originally did, when the model was
 assessed and fitted on the entire dataset. This is usually the case for
@@ -1533,7 +1533,7 @@ algorithm itself, usually based on some distance measure between the
 groups induced. A classical example is that of K-means clustering where
 one must provide the number of groups for the algorithms, even if not
 their labels. We will look into both approaches in what follows.</p>
-<pre><code>## [1] &quot;Tue Dec 05 08:56:57 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Tue Dec 05 09:04:05 2023&quot;</code></pre>
 <div id="load-and-describe-the-dataset" class="section level2">
 <h2>Load and describe the dataset</h2>
 <p>We read in the openly available dataset ‘’Boston’’ from the
@@ -2129,7 +2129,7 @@ explore the outputs of the analyses as interesting in their own right,
 instead merely as intermediaries on the way to further modeling
 harnessing the components as its possible features. We will use openly
 available dataset for our exploration.</em></p>
-<pre><code>## [1] &quot;Tue Dec 05 08:57:03 2023&quot;</code></pre>
+<pre><code>## [1] &quot;Tue Dec 05 09:04:11 2023&quot;</code></pre>
 <div id="load-and-describe-the-dataset-1" class="section level2">
 <h2>Load and describe the dataset</h2>
 <p>We start by reading in the dataset we label ‘’human’’. The dataset
@@ -2251,7 +2251,7 @@ a proportion). The direction is reversed for maternal mortality and
 adolescent birth rate: the higher the value, the worse the situation in
 terms of inequality (and I guess also development, ceteris paribus).</p>
 <p>Equipped with the understanding of the directions of the variables,
-and the fact that blue represents negative and red positive correlation
+and the fact that blue represents positive and red negative correlation
 (and the size of the circle increases with the absolute value of the
 correlation), we immediately notice from our visual of the correlation
 matrix that there are strong correlations in just the directions we

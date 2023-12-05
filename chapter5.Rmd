@@ -66,7 +66,7 @@ corrplot(cor(human_), method="circle", type="upper", cl.pos="b", tl.pos="d", tl.
 
 We note that some measures of inequality have numbers increasing in an ascending order with gender inequality, when this is understood as the extent to which women participate and are empowered in the society (note that there are a few countries and measures on which women are doing better than men). So when Edu2.FM increases, the proportion of women (in comparison to that of men) with secondary education increases; and the same holds for Labo.FM. The direction is the same for Parli.F (which is, unlike the two just mentioned, not a ratio of proportions but a proportion). The direction is reversed for maternal mortality and adolescent birth rate: the higher the value, the worse the situation in terms of inequality (and I guess also development, ceteris paribus).
 
-Equipped with the understanding of the directions of the variables, and the fact that blue represents negative and red positive correlation (and the size of the circle increases with the absolute value of the correlation), we immediately notice from our visual of the correlation matrix that there are strong correlations in just the directions we hypothesized there to be: the measures that have values increasing along the level of development (GNI, life expectancy, expected years of education, proportion of women relative to men having secondary education) are positively correlated with each other, and negatively correlated with the values that have the opposite direction (adolescent births and maternal mortality) relative to the level of development. Adolescent births and maternal mortality are also highly positively correlated with each other.
+Equipped with the understanding of the directions of the variables, and the fact that blue represents positive and red negative correlation (and the size of the circle increases with the absolute value of the correlation), we immediately notice from our visual of the correlation matrix that there are strong correlations in just the directions we hypothesized there to be: the measures that have values increasing along the level of development (GNI, life expectancy, expected years of education, proportion of women relative to men having secondary education) are positively correlated with each other, and negatively correlated with the values that have the opposite direction (adolescent births and maternal mortality) relative to the level of development. Adolescent births and maternal mortality are also highly positively correlated with each other.
 
 However, what is most striking is that while in terms of all those variables mentioned in the previous paragraph, the Pearson correlation coefficients are remarkably high, with an absolute value almost unflinchingly above 0.4, women's participation at the labour market and at the parliament have surprisingly low correlations with the other measures of development. What first comes to mind as a potential explanation for the surprise are some of the richer Arab countries, which probably have a very ''low'' score on these two measures of gender equality, while a high score on the rest (but how about education then?). One should probe more closely into the data to find out (conveniently we have just deleted what appear to have been aggregate measures on regions such as the Arab countries).
 
@@ -207,7 +207,7 @@ library(tidyr)
 keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
 
 # Select the 'keep_columns' to create a new dataset
-tea_time <- select(tea, all_of(keep_columns))
+tea_time <- dplyr::select(tea, all_of(keep_columns))
 
 # look at the summaries and structure of the data
 summary(tea_time)
@@ -217,7 +217,6 @@ str(tea_time)
 library(ggplot2)
 pivot_longer(tea_time, cols = everything()) %>% 
   ggplot(aes(value)) + geom_bar() + facet_wrap("name", scales = "free") + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
-
 
 ```
 
@@ -232,12 +231,11 @@ As with principal component analysis, multiple correspondence analysis proves us
 ```{r, warning=FALSE}
 table(tea_time$how,tea_time$where)
 ```
-to obsrve, for instance, that if we knew that one used unpackaged tea, we would also know him to be much, much more likely to buy their tea from the tea shop (than someone who uses tea bags), we would run into difficulties in the higher dimensions (while we could still manage three dimensions -- since we could just partition contingency tables such as the one in the above by an additional factor -- a fourth dimension would have us stumble).
+to observe, for instance, that if we knew that one used unpackaged tea, we would also know him to be much, much more likely to buy their tea from the tea shop (than someone who uses tea bags), we would run into difficulties in the higher dimensions (while we could still manage three dimensions -- since we could just partition contingency tables such as the one in the above by an additional factor -- a fourth dimension would have us stumble).
 
 So let us look at a visual constructed in line with multiple correspondence analysis of the MAC function in the FactoMineR package.
 
 ```{r}
-# Work with the exercise in this chunk, step-by-step. Fix the R code!
 # Tea_time is available
 
 # Multiple correspondence analysis
