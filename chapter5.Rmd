@@ -176,3 +176,84 @@ biplot<-ggplot_pca(pca_human_std, labels=rownames(pca_human_std$x),labels_textsi
 biplot + geom_label(label="High standard of living; High gender equality", x=-0.9, y=2.8, size=2.5) + geom_label(label="Low standard of living; High gender equality",, x=2.2, y=2.8, size=2.5) + geom_label(label="High standard of living; Low gender equality",, x=-0.9, y=-2.6, size=2.5) + geom_label(label="Low standard of living; Low gender equality",, x=2.2, y=-2.6, size=2.5)
 ```
 
+The plot is now a little more readable than our earlier biplot, and we have the interpretations for the quadrants in the labels. Another alternative to communicate a similar point would have been to colour the groups of observations by their coordinates. We have cut some corners in aiming to capture the sense of the variables determining the principal components by labeling the first component one concerning ''standard of living'' and the other ''gender equality''. The former label is somewhat too narrow of a term, but it is better than, say, ''economic development'' and many other variants I can think of that have too heavy of an emphasis on material well being. The latter label -- gender equality -- is, on the contrary, too broad. For we have here only participation in the labour market and representation in the parliament. For instance, gender equal education is in reflected more heavily on the first principal component.
+
+For our final bit of this case study, we turn to multiple correspondence analysis, which can be considered family resemblant with principal component analysis in the sense that it can be used to serve pretty much the same tasks, but on categorical rather than interval-valued data.
+
+We first load in the dataset that concerns tea consumption: habits, impressions, likes and dislikes of its consumers. We turn strings into factors when loading in the data.
+
+```{r, warnings=FALSE}
+library(readr)
+tea <- read.csv("https://raw.githubusercontent.com/KimmoVehkalahti/Helsinki-Open-Data-Science/master/datasets/tea.csv", stringsAsFactors = TRUE)
+```
+```{r, warnings=FALSE}
+# Take a look at the dimensions of the dataset
+dim(tea)
+
+# Take a look at the structure of the dataset
+str(tea)
+```
+
+We have 300 observations of 36 variables, with all but ''age'' categorical. The values are responses of tea consumers on questions relating to their tea-drinking, and their perceptions thereon. We have a broad range of variables on when the respondent consumes tea, where, with whom, in what occasions, how, what type of tea, and what are his impressions of tea, his motives for drinking it and so on. We also have some basic questions on the respondents' background, such as their age, gender and apparently also on their socioeconomic class in terms of their profession. All in all, we have quite the rich tea dataset, even if one wonders whether the tea-loving respondent has been unduly strained when forced to choose but one category for each question (breakfast, not-breakfast!). Or, perhaps such strict compartmentalization is not a strain, but a pleasure for the tea enthusiast.
+
+There are, of course, a little too many variables to summarize, so we pick a small subset of six variables to take a closer look at. We visualize their unidimensional distributions by barplots that are befitting for the measurement level of our chosen variables that are all factors.
+
+```{r, warning=FALSE}
+
+library(dplyr)
+library(tidyr)
+
+# Enlist column names to keep in the dataset
+keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
+
+# Select the 'keep_columns' to create a new dataset
+tea_time <- select(tea, all_of(keep_columns))
+
+# look at the summaries and structure of the data
+summary(tea_time)
+str(tea_time)
+
+# visualize the dataset
+library(ggplot2)
+pivot_longer(tea_time, cols = everything()) %>% 
+  ggplot(aes(value)) + geom_bar() + facet_wrap("name", scales = "free") + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
+
+```
+
+```{r, warning=FALSE}
+sum(is.na(tea_time))
+```
+
+We have a dataset of our chosen six variables with 300 observations and no missing values. It seems the majority of the respondents drink their tea _with a teabag_ (principle of least effort!), _without lemon_ or milk or any other addendums, _not at lunch time_, without sugar (although there is practically a tie here), as _Earl Grey_ that is bought from the _chain store_. Note that these summaries are based on the univariate distributions: it might be that the conjunction of the above sets is an exception class (although I doubt this to be the case), even if they were, separately, the majority classes.
+
+As with principal component analysis, multiple correspondence analysis proves useful in visually summarizing multidimensional (categorical) data. For even though we could merely print the pairwise contingency tables, such as:
+
+```{r, warning=FALSE}
+table(tea_time$how,tea_time$where)
+```
+to obsrve, for instance, that if we knew that one used unpackaged tea, we would also know him to be much, much more likely to buy their tea from the tea shop (than someone who uses tea bags), we would run into difficulties in the higher dimensions (while we could still manage three dimensions -- since we could just partition contingency tables such as the one in the above by an additional factor -- a fourth dimension would have us stumble).
+
+So let us look at a visual constructed in line with multiple correspondence analysis of the MAC function in the FactoMineR package.
+
+```{r}
+# Work with the exercise in this chunk, step-by-step. Fix the R code!
+# Tea_time is available
+
+# Multiple correspondence analysis
+library(FactoMineR)
+mca <- MCA(tea_time, graph = FALSE)
+
+# summary of the model
+summary(mca)
+
+# visualize MCA
+plot(mca, invisible=c("ind"),graph.type = "classic",habillage = "quali")
+
+```
+
+We are then able to retrieve plenty more insights than the one we already found in the above with our pairwise contingency table. We note that we can explain roughly 30% of the variance with two dimensions. The first dimension seems to reflect mostly are two variables of the contingency table: where the tea is bought and whether one likes it in tea bags or unpackaged. The second dimension is also driven mostly by these two variables, but mixed with an addendum of ''lemon'', ''sugar'' or ''other''.
+
+It appears that those that like their tea unpackaged from the teashop, are also more likely to prefer to have it green and not to drink it during lunch, whereas those who buy it from the chain store, are likely to drink it in a bag, alone or with sugar. Those that are ''in between'' in terms of where they get their tea (both from the chain store and from the tea shop) are also more likely to be ''in between'' in terms of how they like their tea: either with tea bag or unpackaged. These people are also slighly more likely to enjoy their tea at lunch time, with lemon and milk.
+
+So we have three groups, which could perhaps be labelled ''the tea snobs'', ''the 'everyday' tea consumers'' and the ''in-betweens'', in the respective order to the introduction of the defining characteristics of the groups in the previous paragraph.
