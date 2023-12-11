@@ -1,0 +1,443 @@
+# A case study in longitudinal data analysis
+
+_Longitudinal data concern multiple measurements on usually the same statistical unit, with the measurements taken at different points in time. This creates a correlation structure within-the-unit (or whatever it is that is shared across time), so that the repeated measurements on the same unit cannot be, by default, considered independent of one another. On top of this need of accounting for the hierarchical structure of the data, longitudinal analysis is often concerned with the intensity with which the measurement values change in one or another direction per some time interval. In the following, we will concentrate solely on the effect that the former characteristics ought to have on our data analysis. We will account for the hierarchical nature of the data by utilizing random and mixed effects linear models._
+
+
+```{r, echo=FALSE}
+date()
+```
+## Part 1: the RATS data
+
+Let us first take a look at the repeated measurements on the weights of the rats so that
+we have the growth curves plotted for each rat, but in such a way that the linetype for each curve is determined by the diet of the rat.
+
+```{r, warning=FALSE}
+
+# Require readr and load the dataset
+library(readr)
+RATSL<-read_csv("~/Intro_to_ODS/IODS/data/RATSL.csv")
+
+# Turn ID and group into factors
+RATSL$ID<-as.factor(RATSL$ID)
+RATSL$Group<-as.factor(RATSL$Group)
+
+# Require ggplot2
+library(ggplot2)
+
+# Draw the plot
+ggplot(RATSL, aes(x = Time, y = Weight, group = ID)) +
+  geom_line(aes(linetype = Group)) + 
+  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) +
+  scale_y_continuous(name = "Weight (grams)", limits=c(0,700)) +
+  theme(legend.position = "top")
+```
+
+We may observe that we have slopes for the growth curves that appear pretty much linear through time, and the slopes all appear consistent and positive, so that the weight increases by a pretty much constant amount per unit of time throughout the time interval and _within subject_. Furthermore, all slopes have pretty similar values across the time interval. It appear that, perhaps, in absolute terms, group 1 has a lower weight increase than groups 2 and 3, _but the groups are not balanced at baseline_: group 1 comprises clearly of rats that are much leaner than those in groups 2 and 3. So that it might be the case that percent-wise the increase in weight is of the same magnitude in group 1 as in the other two. Not only is group 1 on average lighter at baseline, it also appears less variable. Further, was it not for a single individual with the highest weight through time, all individuals of group 2 would be heavier than all indvididuals in group 1 and lighter than all individuals in group 3. What's more, it appears that there is very little criss-crossing of the growth curves: the ranks in terms of the weights remain pretty much constant through time. This seems a well-behaved dataset to the point of artificiality.
+
+There is no need to standardize the data by day, to make the above observations, since the slopes are so consistent that standardising with respect to the daily subset of weights would have little to no effect on the plots. However, for the sake of it, let's just verify that this is indeed so.
+
+```{r, warning=FALSE}
+# Standardise the variable weigth and plot again.
+library(dplyr)
+
+RATSL <- RATSL %>%
+  group_by(Time) %>%
+  mutate(stdWeight = scale(Weight)) %>%
+  ungroup()
+
+ggplot(RATSL, aes(x = Time, y = stdWeight, group = ID)) +
+  geom_line(aes(linetype = Group)) + 
+  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) +
+  scale_y_continuous(name = "Weight (grams)") +
+  theme(legend.position = "top")
+```
+
+Indeed, this is pretty much the same figure as our earlier one, with only the scale of the y-axis having changed.
+
+Now we could lump all rats within each diet into one, so that we would discard individual differences in the growth curves. Since there are no missing values in our repeated measurements, we could simply estimate the average weight of each rat by the day based on the average of that group of rats on that day; the standard error of the estimate by the standard error of the diet-specific mean. Let us do so and plot the results.
+
+```{r, warning=FALSE}
+
+library(dplyr)
+library(tidyr
+        )
+# Summarize the data with mean and standard error of weight by group and day
+# Here we will have the n for the formula of standard error of the mean to vary
+# by non missing values of weight grouped by diet and day
+RATSS <- RATSL %>%
+  group_by(Group, Time) %>%
+  summarise( mean = mean(Weight), se = sd(Weight)/sqrt(sum(!is.na(Weight))) ) %>%
+  ungroup()
+
+# Glimpse the data
+glimpse(RATSS)
+
+# Plot the mean profiles
+library(ggplot2)
+ggplot(RATSS, aes(x = Time, y = mean, linetype = Group, shape = Group)) +
+  geom_line() +
+  scale_linetype_manual(values = c(1,2,3)) +
+  geom_point(size=3) +
+  scale_shape_manual(values = c(1,2,3)) +
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se, linetype="1"), width=0.3) +
+  theme(legend.position = "top") +
+  scale_y_continuous(name = "mean(weight) +/- se(weight)")
+
+```
+
+In the above we have the point estimates for the group- and day-wise means, derived _as if we had distinct cross-sections of independent samples of weights from a group-wise population_. We in effect assume that the dietary group membership is all that matters for each singular daily weight. The above type of a plot is all in all pretty much useless for what we supposedly want to derive: an estimate for the effect of the diet measured as an expected _change_ in the weight of the rat. Ideally we would want to be able to compare an estimated individual growth curve to what it would have been for an otherwise similar comparator rat, but one that would not have been subjected to the diet being evaluated.
+
+Even if putting the issue of the counterfactual aside that has to do with deriving any causal estimates, we must further note, that with our dataset that is imbalanced at baseline, we cannot generalize to any future rat that is unlike those in our sample. We could not infer the expected weight of the rat for, say treatment 1, if his baseline weight were something drastically different from the baseline weights of the sample of our rats having been provided the treatment in question (say we wanted to estimate, based on our data, what a rat would weigh at sixty days, if it was provided treatment 1 and it weighed 600 grams at baseline).
+
+So individual time-slice estimates are not really our ultimate concern, especially with the imbalance. If they were, we could infer that the rats in dietary group 1 are on average much slimmer than those in the other groups throughout the followup period, but that the standard errors of our estimates for the weights of the rats in the other two groups overlap. As the graph reads, we have plotted the point estimates for the mean weights and their error bars whose widths coincide with +- 1 standard errors.
+
+It is clear that we do not have any genuine outliers in our dataset, so we will not work through that portion of this part of the assignment. We note, howver, that there is one rat in group three who is somewhat slimmer than the other rats in the group; just as there is one rat in group two that is somewhat heavier than the other rats in his group.
+
+We thus proceed onwards with our simplified analysis that knowingly fails to account for the longitudinal nature of our dataset and the primary interest we have in inferring rates of change by treatment. We next discard the factor of time entirely, merely looking at the estimates for the group-wise mean weights aggregated throughout the time period of our followup.
+
+We ignore the baseline as per standard protocol, but this really makes no difference for the results, since we have such high correlation between consecutive measurements within-rat (the weight measured at our second time point is almost entirely determined by the weight measured at our first time point). We also already know what results we are going to get from our above plots, with all the time-slice point estimates consistently ordered, in an ascending order of magnitude, by the group index.
+
+```{r, warning=FALSE}
+library(dplyr)
+library(tidyr)
+
+# Create a summary data by treatment and subject with mean as the summary variable (ignoring baseline week 0)
+RATSLS <- RATSL %>%
+  filter(Time > 1) %>%
+  group_by(Group, ID) %>%
+  summarise( mean=mean(Weight) ) %>%
+  ungroup()
+
+# Glimpse the data
+glimpse(RATSLS)
+
+# Draw a boxplot of the mean versus treatment
+library(ggplot2)
+ggplot(RATSLS, aes(x = Group, y = mean)) +
+  geom_boxplot() +
+  stat_summary(fun = "mean", geom = "point", shape=23, size=4, fill = "white") +
+  scale_y_continuous(name = "mean(weight), days 2-64")
+
+```
+
+It does not make much sense to plot variability in mean estimates as boxplots for individuals within-group, where the counts of the rats are 9,3 and 4 for groups 1,2 and 3, respectively. This quick and dirty visual does, however, allow us to see that the distributions seem different, but this is not much news, since we have already observed that the point estimates differ in a consistent direction (so that the means of group 1 are smaller than those for group 2, which are smaller than those for group 3) for _all weighings during the followup_. A fortiori will then the group-wise averages calculated from the entire sample be different, and the locations of the distributions distinct. Yet with imbalance at baseline, this is a rather worthless piece of information, since it does not deal with change at all  -- in fact, we can observe that most of this difference is due to different weights at baseline, which obviously cannot have anything to do with the actual impact of the diet (it might, of course, be _instrumentally informative about it_, if the allocation mechanism is not completely random but amounts to, say, an expert assigning the diet, so that this assignment might be correlated with the baseline weights).
+
+Even if we did not want to do a proper longitudinal analysis, it would be more meaningful to look at the within-group differences in the distributions at the start and at the end of the followup, and then compare these differences across the diets. We could summarize the distributions in the beginning and at the end by some summary, such as the mean, and then calculate the difference in terms of these summaries. Let us do just that and quickly glimpse how the differences between the groups then appear.
+
+```{r, warning=FALSE}
+library(dplyr)
+library(tidyr)
+
+# Create a summary data by treatment and subject with mean as the summary variable for the start of the followup
+RATSLS_start <- RATSL %>%
+  filter(Time < 9) %>%
+  group_by(Group, ID) %>%
+  summarise( mean=mean(Weight) ) %>%
+  ungroup()
+
+# Create a summary data by treatment and subject with mean as the summary variable for the start of the followup
+RATSLS_end <- RATSL %>%
+  filter(Time > 56) %>%
+  group_by(Group, ID) %>%
+  summarise( mean=mean(Weight) ) %>%
+  ungroup()
+
+# Glimpse the data
+glimpse(RATSLS_start)
+glimpse(RATSLS_end)
+
+# Join the datasets and remove the originals as redundant
+RATSLS_change<-inner_join(RATSLS_start, RATSLS_end,by="ID")
+
+rm(RATSLS_start)
+rm(RATSLS_end)
+
+# Calculate the difference
+RATSLS_change<-mutate(RATSLS_change,difference=mean.y-mean.x)
+
+# Draw a boxplot of the difference in means at the end and at the start by treatment
+library(ggplot2)
+ggplot(RATSLS_change, aes(x = Group.x, y = difference)) +
+  geom_boxplot() +
+  stat_summary(fun = "mean", geom = "point", shape=23, size=4, fill = "white") +
+  scale_y_continuous(name = "mean(weight), difference between end and start")
+
+```
+
+Based on the differences in the means in the beginning and at the end, and their descriptive box-plots, it would appear that the largest reduction in mean weight in the sample is that observed in group two, and that the distributions for the change appear distinct between the groups. One could proceed to question whether the absolute change in weight is the appropriate outcome measure, or whether one relative to the baseline weight should instead be used (this obviously depends on what it is that we want to infer: if superiority of one treatment against another, comparison of this relative change might be meaningful). One could further ponder whether what happens in the middle of the followup matters, and whether the two time points we've taken as representative of the ''beginning'' and the ''end'' are appropriate choices. For the sake of it, let us take a look at the change relative to the baseline weight, assuming it is ''easier'' for the fat rats to drop a given amount of weight than it is for the slim rats to do so.
+
+```{r, warning=FALSE}
+library(dplyr)
+library(tidyr)
+
+# Calculate the relative change
+RATSLS_change<-mutate(RATSLS_change,relative_difference=difference/mean.x)
+
+# Draw a boxplot of the difference in means at the end and at the start by treatment
+library(ggplot2)
+ggplot(RATSLS_change, aes(x = Group.x, y = relative_difference)) +
+  geom_boxplot() +
+  stat_summary(fun = "mean", geom = "point", shape=23, size=4, fill = "white") +
+  scale_y_continuous(name = "mean(weight), relative difference between end and start")
+
+```
+
+It would appear that group two still has a distribution for the relative change in the mean weights that is located higher than the distributions of the other two groups. In other words, the rats in group two -- based on descriptive statistics alone and unaccounting for inferential uncertainty -- appear to have a larger reduction in their mean weights, relative to their baseline weights, than the rats in the other two groups. Now groups one and three seem pretty much on par, as the larger absolute difference in the mean weights of group three is relativized to their larger baseline weight as compared to group one.
+
+Let us proceed to testing a null of no difference in the means between the groups. We assume the variances equal across the groups, even though it is clear that they are not (with group two having an estimated variance more than triple that of group three and six-fold to that of group one)
+
+```{r, warning=FALSE}
+sd_RATSLS<-RATSLS %>% group_by(Group) %>%
+  summarise( sd=sd(mean) ) %>%
+  ungroup()
+```
+
+We will also follow the exercise in primarily using the overall group-wise means in our testing, instead the differences or the relative differences. We will, however, also look at the differences after conditioning on the baseline weights, which mimics testing the null of no difference with the difference in means as the primary outcome.
+
+We start by looking at the two-sample t-test, with comparisons between the means of groups 1 against 2, 1 against 3, and 2 against 3. We have a two-sided test with our null hypothesis that the mean weights of the individual rats measured during the followup come from the same distribution with equal mean (and assuming equal variance). We should be wary that given that our sample variances differ, and that we have a tiny sample altogether, the assumption of approximate normality of the sampling distributions of the group-wise means inherent in the t-test might not hold.
+
+```{r, warning=FALSE}
+
+# Perform a two-sample t-test, group 1 against 2
+t.test(mean ~ Group, data = RATSLS[1:12,], var.equal = TRUE)
+
+# Perform a two-sample t-test, group 1 against 3
+t.test(mean ~ Group, data = RATSLS[-(9:12),], var.equal = TRUE)
+
+# Perform a two-sample t-test, group 2 against 3
+t.test(mean ~ Group, data = RATSLS[9:16,], var.equal = TRUE)
+
+```
+The result of the t-test is that the data is compatible with the null of equal means (assuming equal variances) when comparing groups two and three, but highly incompatible when making the other two comparisons. The t-value for the test between groups 1 and 2 
+is roughly -9, with 10 degrees of freedom and a p-value of $0.000004$. The t-value for the test between groups 1 and 3  is roughly -28, with 10 degrees of freedom and a p-value of $0.00000000008$.
+
+Just for the fun of it, let us see the results when using the differences in the means as the primary outcome. 
+
+```{r, warning=FALSE}
+
+# Perform a two-sample t-test, group 1 against 2
+t.test(difference ~ Group.x, data = RATSLS_change[1:12,], var.equal = TRUE)
+
+# Perform a two-sample t-test, group 1 against 3
+t.test(difference ~ Group.x, data = RATSLS_change[-(9:12),], var.equal = TRUE)
+
+# Perform a two-sample t-test, group 2 against 3
+t.test(difference ~ Group.x, data = RATSLS_change[9:16,], var.equal = TRUE)
+
+```
+
+The data is highly incompatible with the null of equal differences between groups 1 and 2, incompatible with the null between groups 1 and 3, and compatible with the null between groups 2 and 3.
+
+We should like to note in the passing that testing a point null hypothesis is somewhat silly altogether: with a continuous outcome measure, with support on the positive reals, the _a priori_ probability of the null of equal means being true is 0. This implies we are testing a null we know to be untrue analytically even before collecting or observing any data! Thus, with a large enough sample size (yet holding other characteristics of our sampling scheme constant), we would eventually be guaranteed a sample statistic that is incompatible with our null. This suggests that when carrying out such significance (or hypothesis testing, where there exists an alternative hypothesis) with a point null, we ought not be interpreted as testing the truth of any hypothesis we have seriously ever entertained at all, but merely conducting some sort of preliminary check on the size of our effect of potential interest: if it does not even pass the meager bar of statistical (non-nil) significance, then we might rest rather assured that the effect is neither sizeable enough to be of much substantive interest (yet there are issues with even such use of the procedure).
+
+A much more meaningful framework would be to calculate the posterior of the difference of the two means, which would not only help us escape triviality, but also allow us a probability interpretation for any dichotomous hypothesis we'd like to postulate, including the probability of the difference being larger than or smaller than 0.
+
+If we nonetheless stuck with classical testing procedures, we could make the comparisons between the three groups simultaneously with analysis of variance (ANOVA) and its accompanying F-test, as follows (after having gained the results in the above, this does not bring much additional information, though, since we are sure to reject the null of the equality of all group-wise means given that we have already done so for some of the pairwise means).
+
+```{r, warning=FALSE}
+
+library(dplyr)
+library(tidyr)
+
+# Fit the linear model with the mean as the response 
+fit <- lm(mean ~ Group, data = RATSLS)
+
+# Compute the analysis of variance table for the fitted model with anova()
+anova(fit)
+
+```
+
+We get an F-statistic of roughly 88 with two degrees of freedom, implying a very low p-value, as expected.
+
+We get results also highly incompatible with the null if we conduct the test by conditioning on the baseline, or by using our difference in means as the primary outcome.
+
+```{r, warning=FALSE}
+
+library(dplyr)
+library(tidyr)
+
+# We have the datasets sorted in a way which allows us simply to take the first 16 observations of weighs as providing the baseline weight for IDs 1 to 16 on the first 16 rows f the RATSLS data.frame.
+RATSLS$baseline<-as.vector(as.matrix(RATSL[1:16,4]))
+
+# Fit the linear model with the mean as the response and the baseline as a conditioning variable 
+fit <- lm(mean ~ Group + baseline, data = RATSLS)
+
+# Compute the analysis of variance table for the fitted model with anova()
+anova(fit)
+
+```
+
+When conditioning on the baseline, we notice that both the baseline and the group are highly statistically significant -- as we have already stressed, the data is highly incompatible with both the null that the weights at baseline would be equal between the groups, and also that the group means would be equal, even after accounting for the differences in the baseline weights. We may observe that this incompatibility holds if we tested the slightly different null of the equality of the means of the differences (of means).
+
+```{r, warning=FALSE}
+
+library(dplyr)
+library(tidyr)
+
+
+# Fit the linear model with the mean as the response and the baseline as a conditioning variable 
+fit <- lm(difference ~ Group.x, data = RATSLS_change)
+
+# Compute the analysis of variance table for the fitted model with anova()
+anova(fit)
+
+```
+## Part 2: linear mixed effects models for the BPRS data
+
+Let us first load the BPRS data that concern 40 male subjects randomized to one of two treatments and then measured on eight consecutive weeks in terms of the _brief psychiatric rating scale_ (BPRS).
+
+```{r, warning=FALSE}
+
+# Require readr and load the dataset
+library(readr)
+BPRSL<-read_csv("~/Intro_to_ODS/IODS/data/BPRSL.csv")
+
+# Turn subject and treatment into factors
+BPRSL$subject<-as.factor(BPRSL$subject)
+BPRSL$treatment<-as.factor(BPRSL$treatment)
+
+glimpse(BPRSL)
+
+# Require ggplot2
+library(ggplot2)
+
+# Draw the plot
+ggplot(BPRSL, aes(x = week, y = bprs, linetype = subject)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ treatment, labeller = label_both) +
+  theme(legend.position = "none") + 
+  scale_y_continuous(limits = c(min(BPRSL$bprs), max(BPRSL$bprs)))
+
+```
+
+We note that the dataset is in the same long format as our previous RATS data. We have described both datasets and their properties in our data wrangling file. The long format simply means that the repeated measures, in this case the BPRS-values, are stored in a single column (here called "bprs"), and the identifier for the week on which that value is measured in another column (here called "week"). Each measurement value is further identified with a "subject" "treatment" pair, so that each measurement is for a given week, subject and treatment. We have turned our treatment and subject indicators into factors so that R would not mistakenly treat these as anything besides categorical.
+
+From the plot we may immediately observe that the general trend is that the BPRS-values are declining, which holds promise in terms of the efficacy of the treatments, assuming that the natural course of the disease (a trajectory without any treatment) is not even more steeply declining than what we observe for the trajectories given the treatments.
+
+We also note that there is considerable variance in terms of weekly BPRS-values, and that this variance seems to decline through time, especially in the case of the first treatment. 
+We may also note that the values at the end depend on the values at the beginning: as is standard, there is correlation between consecutive measurement values within-subject, but also such that is strong and consistent enough to imply correlation between the baseline and the endline values.
+
+We note that _unlike for the rats_, we seem to have, to the naked eye at least, rather balanced allocation to the two treatments in terms of the baseline values (randomization is to ensure that we have balance in expectation across infinitely repeated similar samples, but not necessarily in the single observed sample).
+
+We may further note that while the general trend is declining, there are a hanful of patients that have BPRS-values increasing at some point during the followup, with also some rather consistent increases particularly in the last three to four weeks. 
+
+Lastly, we may note that there is an outlier in terms of treatment two that has a baseline value above 75. This is such that might imbalance the otherwise seemingly balanced treatment groups and could be deleted from further analyses. However, deleting outliers is always a judgement call, and one consistently made for the wrong reasons (it is usually the model that ought to be changed, specifically the objective function inherent in least-squares, not the outlier inconsistent with the model), so we decide to let the outlier remain in our analysis.
+
+To observe the consistency with which some individuals score higher on the bprs, regardless of the time of the measurement, it is advisable to standardize with respect to the weekly measurement values. Since we have some zigg-zagging and an overall declining trend to the measurement values, this allows us to better observe the individual measurement value comparative to the average value of that week.
+
+```{r, warning=FALSE}
+
+library(dplyr)
+library(tidyr)
+
+# Standardise the variable bprs
+BPRSL <- BPRSL %>%
+  group_by(week) %>%
+  mutate(stdbprs = scale(bprs)) %>%
+  ungroup()
+
+# Glimpse the data
+glimpse(BPRSL)
+
+# Plot again with the standardised bprs
+library(ggplot2)
+ggplot(BPRSL, aes(x = week, y = stdbprs, linetype = subject)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ treatment, labeller = label_both) +
+  scale_y_continuous(name = "stdbprs")
+
+```
+
+There is some zigg-zagging (unlike with the weights of the rats), so that the rank of the individual in terms of his BPRS-value is not constant through time, but there is considerable consistency in the rank.
+
+Now we could continue neglecting the correlational structure imposed by the repetitive nature of our measurements and explore the association between the treatment and the primary outcome with simple regression analysis, as follows: 
+
+```{r, warning=FALSE}
+
+# Create a regression model for BPRS
+BPRS_reg <- lm(bprs ~ week + treatment, data=BPRSL)
+
+# print out a summary of the model
+summary(BPRS_reg)
+```
+
+and we could note that while the regression coefficient estimate for the week is negative and highly significant, the treatment dummy is not (when conditioning on the week). But such analysis would neglect the inherent structure of our data by assuming there to exist no within-subject correlation between the repetitive measurements.
+
+A more meaningful analysis is based on linear mixed effects models, that allow for random effects for either the intercept or the coefficients ("mixed") or both ("full random-effecta") as opposed to treating these all as fixed. This means that one may account for the fact that the intercept terms differ by individual (them being thought of as sampled from a normal distribution with mean zero and a variance reflecting the across-individuals variability of the intercepts); and, further, that also the regression coefficients (for the explanatory time variable) ought allowed to so differ. Both of the intercepts and the coefficients can then be considered to have shared as well as individual-specific terms, with the random intercepts providing the individual discrepancy from the shared term for the intercept, and the random coefficients the individual discrepancy from the shared term for the slope.
+
+```{r, warning=FALSE}
+# access library lme4
+library(lme4)
+
+# Create a random intercept model
+BPRS_ref <- lmer(bprs ~ week + treatment + (1 | subject), data = BPRSL, REML = FALSE)
+
+# Print the summary of the model
+summary(BPRS_ref)
+
+```
+
+We may note that our random effects are in place, with the variability of the intercepts across the individuals comparatively high, at an estimated variance of roughly 47 (with the range of our outcome from 18 to 95). Our shared and fixed treatment term has a t-value of 0.53, which is clearly not statistically significant. Our best fixed effect estimate for the regression coefficient of the week remains as before, with a point estimate roughly at -2.3.
+
+We should allow for individually varying slopes, so let us fit a model with both random intercept as well as random regression coefficient for the week. We can then compare which model better fits the data, with our a priori assumption being that the fully random trumps the mixed model (with fixed slope).
+
+```{r, warning=FALSE}
+
+# Create a random intercept and random slope model
+library(lme4)
+
+BPRS_ref1 <- lmer(bprs ~ week + treatment + (week | subject), data = BPRSL, REML = FALSE)
+
+# print a summary of the model
+summary(BPRS_ref1)
+
+# perform an ANOVA test on the two models
+anova(BPRS_ref1, BPRS_ref)
+
+```
+
+When comparing our models we may observe that the random intercept and random slope model has a slightly lower AIC, BIC and deviance (than the mixed model), and performs better on all the measures of fit we have calculated. The likelihood-ratio test provides a chi-square test statistic of 7.3, with 2 degrees of freedom (the variance of the coefficients on time and the covariance of these coefficients with the intercepts), which is statistically significant and (by a rather small margin) incompatible with the null of equal fit. This means that the differences in terms of the fits are small, but favor slightly the model with both terms random. Our point estimates for the fixed effects remain as before, and the treatment insignificant with a t-value 0.55 (we have a confidence interval that includes 0 by a long margin with a point estimate of 0.57 and a standard error of roughly 1).
+
+We may wrap up our modeling by looking at a random effects model that includes an interaction term between the treatment and the week.
+
+```{r, warning=FALSE}
+
+# Create a random intercept and random slope model with the interaction
+library(lme4)
+BPRS_ref2 <-  lmer(bprs ~ week * treatment + (week | subject), data = BPRSL, REML = FALSE)
+
+# print a summary of the model
+summary(BPRS_ref2)
+
+# perform an ANOVA test on the two models
+anova(BPRS_ref2, BPRS_ref1)
+
+# Create a vector of the fitted values
+Fitted <- fitted(BPRS_ref2)
+
+library(dplyr)
+library(tidyr)
+
+# Create a new column fitted to BPRSL
+BPRSL <- mutate(BPRSL,fitted=Fitted)
+
+# draw the plot of BPRS with the Fitted values of bprs
+library(ggplot2)
+ggplot(BPRSL, aes(x = week, y = fitted, group = subject)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ treatment, labeller = label_both) +
+  scale_y_continuous(name = "stdbprs")
+
+
+```
+
+
+We may note that while our other estimates remain roughly where they were in terms of their magnitude and direction, we have an interaction that is borderline statistically significant in terms of the two-sided test (with a point estimate at 0.7 and standard error of 0.4). The likelihood-ratio test between the full random effect model with and without an interaction provides a chi-square test statistic of 3.17 in favor of the interaction model with one degree of freedom (the interaction term), which is associated with a p-value of 0.08. This is suggestive of the interaction model providing the better fit with the data at hand, but this is both a borderline, as well as a judgement call in general. For instance, we may note that the BIC is a tad higher for our interaction model, since this measure of fit penalizes for the additional complexity that comes with the inclusion of the interaction term.
+
+Overall, in terms of the comparison of the treatments when it comes to their efficacy measured with the BPRS, we may conclude that our data is compatible with the null of equal efficacy of the two treatments.
+
+Finally, by looking at the fitted values of the random effects interaction model, we may observe that our point estimates for the BPRS-values within the followup period are very similar across the two treatments. This bolsters our conclusion that there are no substantively meaningful differences between the two assessed treatments in terms of their efficacy in reducing psychiatric symptoms when measured by the BPRS during a two-month followup period.
+
