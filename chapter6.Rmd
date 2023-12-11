@@ -429,7 +429,7 @@ ggplot(BPRSL, aes(x = week, y = fitted, group = subject)) +
   geom_line() +
   scale_linetype_manual(values = rep(1:10, times=4)) +
   facet_grid(. ~ treatment, labeller = label_both) +
-  scale_y_continuous(name = "stdbprs")
+  scale_y_continuous(name = "fitted values for bprs")
 
 
 ```
